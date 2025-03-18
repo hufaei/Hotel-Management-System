@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.sz</groupId>
-    <artifactId>sz-boot-parent</artifactId>
+    <artifactId>manage-boot-parent</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>sz-common</module>
-        <module>sz-service</module>
-        <module>sz-dependencies</module>
+        <module>hotel-reverse-common</module>
+        <module>reverse-service</module>
+        <module>hotel-dependencies</module>
     </modules>
     <parent>
         <groupId>com.sz</groupId>
@@ -30,7 +30,7 @@
         <dependencies>
             <dependency>
                 <groupId>com.sz</groupId>
-                <artifactId>sz-dependencies</artifactId>
+                <artifactId>hotel-dependencies</artifactId>
                 <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>

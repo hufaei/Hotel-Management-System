@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sz.admin.payment.mapper.PaymentMapper">
+    <!-- 通用映射 -->
+    <resultMap id="BaseResultMap" type="com.sz.admin.payment.pojo.po.Payment">
+        <id column="payment_id" property="paymentId"/>
+        <result column="booking_id" property="bookingId"/>
+        <result column="amount" property="amount"/>
+        <result column="payment_status" property="paymentStatus"/>
+        <result column="reason" property="reason"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        booking_id, amount, payment_status, reason, created_at
+    </sql>
+
+</mapper>
