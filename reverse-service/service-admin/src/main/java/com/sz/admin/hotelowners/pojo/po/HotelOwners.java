@@ -29,7 +29,7 @@ public class HotelOwners implements Serializable {
     private Long ownerId;
 
     @Schema(description ="关联的酒店ID")
-    private Long hotelId;
+    private String hotelId;
 
     @Schema(description ="代表人姓名")
     private String name;

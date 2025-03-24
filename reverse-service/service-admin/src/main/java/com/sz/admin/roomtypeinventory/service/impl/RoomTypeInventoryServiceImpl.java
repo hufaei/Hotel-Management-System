@@ -63,7 +63,7 @@ public class RoomTypeInventoryServiceImpl extends ServiceImpl<RoomTypeInventoryM
     @Transactional
     public Boolean update(RoomTypeInventoryUpdateDTO dto){
         // 参数校验
-        Long roomTypeId = dto.getRoomTypeId();
+        String roomTypeId = dto.getRoomTypeId();
         LocalDate date = dto.getDate();
         Long preset = dto.getPreset();
         CommonResponseEnum.VALID_ERROR.assertTrue(preset < 0);
@@ -91,7 +91,7 @@ public class RoomTypeInventoryServiceImpl extends ServiceImpl<RoomTypeInventoryM
     @Override
     @Transactional
     public Boolean bookRoom(RoomTypeInventoryBookDTO dto) {
-        Long roomTypeId = dto.getRoomTypeId();
+        String roomTypeId = dto.getRoomTypeId();
         LocalDate date = dto.getDate();
         Long bookCount = dto.getBookCount();
 
@@ -195,7 +195,7 @@ public List<Boolean> batchCancelRoom(List<RoomTypeInventoryBookDTO> dtoList) {
     @Override
     @Transactional
     public Boolean cancelRoom(RoomTypeInventoryBookDTO dto) {
-        Long roomTypeId = dto.getRoomTypeId();
+        String roomTypeId = dto.getRoomTypeId();
         LocalDate date = dto.getDate();
         Long bookCount = dto.getBookCount();
 

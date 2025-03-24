@@ -31,9 +31,25 @@ public class ReviewsVO {
     @Schema(description =  "评价用户ID")
     private Long userId;
 
-    @ExcelProperty(value = "评分，范围为1到5")
-    @Schema(description =  "评分，范围为1到5")
-    private Integer rating;
+    @ExcelProperty(value = "总评分")
+    @Schema(description ="总评分")
+    private Double rating;
+
+    @ExcelProperty(value ="卫生评分")
+    @Schema(description ="卫生评分")
+    private Double healthRate;
+
+    @ExcelProperty(value ="环境评分")
+    @Schema(description ="环境评分")
+    private Double envRate;
+
+    @ExcelProperty(value ="服务评分")
+    @Schema(description ="服务评分")
+    private Double serviceRate;
+
+    @ExcelProperty(value ="设施评分")
+    @Schema(description ="设施评分")
+    private Double facilitiesRate;
 
     @ExcelProperty(value = "用户评价内容")
     @Schema(description =  "用户评价内容")

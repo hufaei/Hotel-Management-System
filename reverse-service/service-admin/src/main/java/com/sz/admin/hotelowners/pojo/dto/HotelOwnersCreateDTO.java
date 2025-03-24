@@ -17,6 +17,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Schema(description = "HotelOwners添加DTO")
 public class HotelOwnersCreateDTO {
 
+   @Schema(description =  "关联的酒店ID")
+   private String hotelId;
+
    @Schema(description =  "代表人姓名")
    private String name;
 

@@ -34,10 +34,10 @@ public class Bookings implements Serializable {
     private Long userId;
 
     @Schema(description ="关联的酒店ID")
-    private Long hotelId;
+    private String hotelId;
 
     @Schema(description ="房型ID")
-    private Long roomTypeId;
+    private String roomTypeId;
 
     @Schema(description ="预订数量")
     private Long bookCount;

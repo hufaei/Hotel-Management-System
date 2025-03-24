@@ -19,7 +19,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class RoomTypesUpdateDTO {
 
     @Schema(description =  "房型ID")
-    private Long roomTypeId;
+    private String roomTypeId;
 
     @Schema(description =  "房型价格，单位为元")
     private Long price;
@@ -27,13 +27,10 @@ public class RoomTypesUpdateDTO {
     @Schema(description =  "房型照片URL列表，存储为JSON数组")
     private String photoUrls;
 
-    @Schema(description ="入住人数")
-    private Long capacity;
+    @Schema(description ="房型信息")
+    private String info;
 
-    @Schema(description =  "房型大小，单位为平方米")
-    private Long size;
-
-    @Schema(description =  "房型描述信息")
+    @Schema(description ="内部设施描述信息")
     private String description;
 
 }

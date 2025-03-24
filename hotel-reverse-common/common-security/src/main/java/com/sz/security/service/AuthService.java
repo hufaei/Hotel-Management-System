@@ -12,4 +12,5 @@ import com.sz.security.pojo.LoginVO;
 public interface AuthService {
 
     LoginVO loginClient(LoginInfo info);
+
 }

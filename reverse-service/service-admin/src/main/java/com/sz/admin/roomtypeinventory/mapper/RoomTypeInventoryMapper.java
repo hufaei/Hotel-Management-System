@@ -26,7 +26,7 @@ public interface RoomTypeInventoryMapper extends BaseMapper<RoomTypeInventory> {
     @Update("UPDATE room_type_inventory " +
             "SET available_quantity = available_quantity - #{bookCount} " +
             "WHERE room_type_id = #{roomTypeId} AND date = #{date} AND available_quantity >= #{bookCount}")
-    int reduceInventory(@Param("roomTypeId") Long roomTypeId,
+    int reduceInventory(@Param("roomTypeId") String roomTypeId,
                         @Param("date") LocalDate date,
                         @Param("bookCount") Long bookCount);
 
@@ -40,7 +40,7 @@ public interface RoomTypeInventoryMapper extends BaseMapper<RoomTypeInventory> {
     @Update("UPDATE room_type_inventory " +
             "SET available_quantity = available_quantity + #{bookCount} " +
             "WHERE room_type_id = #{roomTypeId} AND date = #{date}")
-    int increaseInventory(@Param("roomTypeId") Long roomTypeId,
+    int increaseInventory(@Param("roomTypeId") String roomTypeId,
                           @Param("date") LocalDate date,
                           @Param("bookCount") Long bookCount);
 
@@ -48,7 +48,7 @@ public interface RoomTypeInventoryMapper extends BaseMapper<RoomTypeInventory> {
             "SET available_quantity = LEAST(#{preset}, available_quantity + (#{preset} - preset)) ,"
              +" preset = #{preset} "+
             "WHERE room_type_id = #{roomTypeId} AND date = #{date}")
-    int updateInventory(@Param("roomTypeId") Long roomTypeId,
+    int updateInventory(@Param("roomTypeId") String roomTypeId,
                         @Param("date") LocalDate date,
                         @Param("preset") Long preset);
 

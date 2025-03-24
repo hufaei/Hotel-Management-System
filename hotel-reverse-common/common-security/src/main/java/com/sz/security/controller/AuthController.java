@@ -5,7 +5,9 @@ import com.sz.core.common.annotation.DebounceIgnore;
 import com.sz.core.common.entity.ApiResult;
 import com.sz.security.pojo.LoginInfo;
 import com.sz.security.pojo.LoginVO;
+import com.sz.security.pojo.PasswordResetVo;
 import com.sz.security.service.AuthService;
+import com.sz.security.service.ResetAuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,8 @@ public class AuthController {
 
     private final AuthService authService;
 
+    private final ResetAuthService resetAuthService;
+
     @DebounceIgnore
     @Operation(summary = "登录")
     @PostMapping("login")
@@ -42,6 +46,16 @@ public class AuthController {
     @Operation(summary = "登出")
     @PostMapping("logout")
     public ApiResult logout() {
+        // 注意执行顺序，最后再执行logout
+        StpUtil.getTokenSession().logout(); // 清除缓存session
+        StpUtil.logout();
+        return ApiResult.success();
+    }
+
+    @Operation(summary = "修改密码")
+    @PostMapping("resetPassword")
+    public ApiResult resetPassword(@RequestBody PasswordResetVo resetVo) {
+        resetAuthService.resetPassword(resetVo);
         // 注意执行顺序，最后再执行logout
         StpUtil.getTokenSession().logout(); // 清除缓存session
         StpUtil.logout();

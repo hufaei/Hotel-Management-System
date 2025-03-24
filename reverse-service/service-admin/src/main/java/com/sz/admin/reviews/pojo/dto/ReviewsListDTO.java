@@ -23,6 +23,12 @@ public class ReviewsListDTO extends PageQuery {
     @Schema(description =  "评价用户ID")
     private Long userId;
 
+    @Schema(description ="总评分上限")
+    private Double ratingCeil;
+
+    @Schema(description ="总评分下限")
+    private Double ratingFloor;
+
     @Schema(description =  "评价创建时间开始")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAtStart;

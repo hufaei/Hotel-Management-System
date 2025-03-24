@@ -26,7 +26,7 @@ public class RoomTypeInventory implements Serializable {
 
     @Id
     @Schema(description ="关联的房型ID")
-    private Long roomTypeId;
+    private String roomTypeId;
 
     @Id
     @Schema(description ="日期")

@@ -1,7 +1,6 @@
 package com.sz.admin.roomtypes.pojo.vo;
 
 import com.alibaba.excel.annotation.ExcelProperty;
-import com.sz.platform.enums.RoomType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import java.math.BigDecimal;
@@ -25,29 +24,26 @@ public class RoomTypesVO {
 
     @ExcelProperty(value = "关联的酒店ID")
     @Schema(description =  "关联的酒店ID")
-    private Long hotelId;
+    private String hotelId;
 
     @ExcelProperty(value = "房型类型")
     @Schema(description =  "房型类型")
-    private RoomType roomType;
+    private String roomType;
 
-    @ExcelProperty(value = "房型价格，单位为元")
-    @Schema(description =  "房型价格，单位为元")
+    @ExcelProperty(value = "房型起步价，单位：元")
+    @Schema(description ="房型起步价，单位：元")
     private Long price;
 
     @ExcelProperty(value = "房型照片URL列表，存储为JSON数组")
     @Schema(description =  "房型照片URL列表，存储为JSON数组")
     private String photoUrls;
 
-    @ExcelProperty(value = "房型大小，单位为平方米")
-    @Schema(description =  "房型大小，单位为平方米")
-    private Long size;
+    @ExcelProperty(value ="房型信息")
+    @Schema(description ="房型信息")
+    private String info;
 
-    @Schema(description ="入住人数")
-    private Long capacity;
-
-    @ExcelProperty(value = "房型描述信息")
-    @Schema(description =  "房型描述信息")
+    @ExcelProperty(value ="房型信息")
+    @Schema(description ="内部设施描述信息")
     private String description;
 
     @ExcelProperty(value = "房型记录创建时间")

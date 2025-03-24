@@ -24,7 +24,6 @@ import java.util.Objects;
 import com.sz.admin.hotels.pojo.dto.HotelsCreateDTO;
 import com.sz.admin.hotels.pojo.dto.HotelsUpdateDTO;
 import com.sz.admin.hotels.pojo.dto.HotelsListDTO;
-import com.sz.admin.hotels.pojo.dto.HotelsImportDTO;
 import com.sz.core.common.entity.ImportExcelDTO;
 import com.sz.excel.core.ExcelResult;
 import jakarta.servlet.ServletOutputStream;
@@ -53,9 +52,13 @@ public class HotelsServiceImpl extends ServiceImpl<HotelsMapper, Hotels> impleme
     public void create(HotelsCreateDTO dto){
         // todo 从sa-token中读取ownerId 事务更新双表
         Long ownerId = 2L;
+        Integer stars = dto.getStars();
+        Integer roomCount = dto.getRoomCount();
 
         QueryWrapper wrapper = QueryWrapper.create().eq(Hotels::getAddress, dto.getAddress());
         CommonResponseEnum.ADDRESS_EXISTS.assertTrue(count(wrapper) > 0);
+        CommonResponseEnum.INVALID.message("星级信息错误").assertTrue(stars>5 || stars<0);
+        CommonResponseEnum.INVALID.message("房间数量信息错误").assertTrue(roomCount < 0);
         Hotels hotels = BeanCopyUtils.copy(dto, Hotels.class);
         save(hotels);
 //        System.out.println(hotels);
@@ -72,7 +75,7 @@ public class HotelsServiceImpl extends ServiceImpl<HotelsMapper, Hotels> impleme
     public void update(HotelsUpdateDTO dto){
         // todo 从sa-token中读取ownerId
         Long ownerId = 2L;
-
+        // 更新时必须填充原所有数据
         Hotels hotels = BeanCopyUtils.copy(dto, Hotels.class);
         QueryWrapper wrapper;
         // id有效性校验
@@ -121,12 +124,12 @@ public class HotelsServiceImpl extends ServiceImpl<HotelsMapper, Hotels> impleme
     @SneakyThrows
     @Override
     public void importExcel(ImportExcelDTO dto) {
-        ExcelResult<HotelsImportDTO> excelResult = ExcelUtils.importExcel(dto.getFile().getInputStream(), HotelsImportDTO.class, true);
-        List<HotelsImportDTO> list = excelResult.getList();
-        List<String> errorList = excelResult.getErrorList();
-        String analysis = excelResult.getAnalysis();
-        System.out.println(" analysis : " + analysis);
-        System.out.println(" isCover : " + dto.getIsCover());
+//        ExcelResult<HotelsImportDTO> excelResult = ExcelUtils.importExcel(dto.getFile().getInputStream(), HotelsImportDTO.class, true);
+//        List<HotelsImportDTO> list = excelResult.getList();
+//        List<String> errorList = excelResult.getErrorList();
+//        String analysis = excelResult.getAnalysis();
+//        System.out.println(" analysis : " + analysis);
+//        System.out.println(" isCover : " + dto.getIsCover());
     }
 
     @SneakyThrows // 自动“忽略”受检异常
@@ -145,14 +148,23 @@ public class HotelsServiceImpl extends ServiceImpl<HotelsMapper, Hotels> impleme
         if (Utils.isNotNull(dto.getHotelName())) {
             wrapper.like(Hotels::getHotelName, dto.getHotelName());
         }
+        if (Utils.isNotNull(dto.getProvince())) {
+            wrapper.like(Hotels::getProvince, dto.getProvince());
+        }
+        if (Utils.isNotNull(dto.getCity())) {
+            wrapper.like(Hotels::getCity, dto.getCity());
+        }
+        if (Utils.isNotNull(dto.getCountry())) {
+            wrapper.like(Hotels::getCountry, dto.getCountry());
+        }
+        if (Utils.isNotNull(dto.getStars())) {
+            wrapper.like(Hotels::getStars, dto.getStars());
+        }
         if (Utils.isNotNull(dto.getAddress())) {
             wrapper.eq(Hotels::getAddress, dto.getAddress());
         }
-        if (Utils.isNotNull(dto.getLatitude())) {
-            wrapper.eq(Hotels::getLatitude, dto.getLatitude());
-        }
-        if (Utils.isNotNull(dto.getLongitude())) {
-            wrapper.eq(Hotels::getLongitude, dto.getLongitude());
+        if (Utils.isNotNull(dto.getOpeningDateEnd()) && Utils.isNotNull(dto.getOpeningDateStart())) {
+            wrapper.between(Hotels::getOpeningYear, dto.getOpeningDateStart(),dto.getOpeningDateEnd());
         }
 
         return wrapper;

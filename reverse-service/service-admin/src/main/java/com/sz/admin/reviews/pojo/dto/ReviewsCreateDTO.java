@@ -20,8 +20,20 @@ public class ReviewsCreateDTO {
    @Schema(description =  "关联的预订ID")
    private Long bookingId;
 
-   @Schema(description =  "评分，范围为1到5")
-   private Integer rating;
+   @Schema(description ="总评分")
+   private Double rating;
+
+   @Schema(description ="卫生评分")
+   private Double healthRate;
+
+   @Schema(description ="环境评分")
+   private Double envRate;
+
+   @Schema(description ="服务评分")
+   private Double serviceRate;
+
+   @Schema(description ="设施评分")
+   private Double facilitiesRate;
 
    @Schema(description =  "用户评价内容")
    private String comment;

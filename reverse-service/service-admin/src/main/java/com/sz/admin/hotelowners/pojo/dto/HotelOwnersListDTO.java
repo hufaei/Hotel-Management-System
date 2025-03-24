@@ -18,7 +18,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class HotelOwnersListDTO extends PageQuery {
 
     @Schema(description =  "关联的酒店ID")
-    private Long hotelId;
+    private String hotelId;
 
     @Schema(description =  "代表人姓名")
     private String name;

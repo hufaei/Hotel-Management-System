@@ -1,7 +1,6 @@
 package com.sz.admin.rooms.pojo.vo;
 
 import com.sz.platform.enums.RoomStatus;
-import com.sz.platform.enums.RoomType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import java.math.BigDecimal;
@@ -26,7 +25,7 @@ public class RoomsVO {
 
     @ExcelProperty(value = "关联的酒店ID")
     @Schema(description =  "关联的酒店ID")
-    private Long hotelId;
+    private String hotelId;
 
     @ExcelProperty(value = "房间号")
     @Schema(description =  "房间号")
@@ -34,7 +33,7 @@ public class RoomsVO {
 
     @ExcelProperty(value = "房间类型")
     @Schema(description =  "房间类型")
-    private RoomType roomType;
+    private String roomType;
 
 
     @ExcelProperty(value = "房间状态")

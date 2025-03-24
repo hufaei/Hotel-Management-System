@@ -54,16 +54,25 @@ public class ReviewsServiceImpl extends ServiceImpl<ReviewsMapper, Reviews> impl
         Reviews reviews = BeanCopyUtils.copy(dto, Reviews.class);
         Long userId = 1L;
         Long bookingId = reviews.getBookingId();
-        Integer rate = reviews.getRating();
+        Double rate = reviews.getRating();
+        Double hRate = reviews.getHealthRate();
+        Double eRate = reviews.getEnvRate();
+        Double sRate = reviews.getServiceRate();
+        Double fRate = reviews.getFacilitiesRate();
+
         // 校验
         Users users = usersService.getById(userId);
         Bookings bookings = bookingsService.getById(bookingId);
         QueryWrapper wrapper = QueryWrapper.create().eq(Reviews::getBookingId, dto.getBookingId());
         CommonResponseEnum.NOT_EXISTS.message("不存在的用户").assertNull(users);
         CommonResponseEnum.NOT_EXISTS.message("不存在的订单").assertNull(bookings);
-        CommonResponseEnum.NOT_EXISTS.message("不存在的评分范围").assertFalse(rate>=0 && rate<=5);
+        CommonResponseEnum.NOT_EXISTS.message("不存在的评分范围").assertFalse(rate>=0.0d && rate<=5.0d);
+        CommonResponseEnum.NOT_EXISTS.message("不存在的评分范围").assertFalse(hRate>=0.0d && hRate<=5.0d);
+        CommonResponseEnum.NOT_EXISTS.message("不存在的评分范围").assertFalse(eRate>=0.0d && eRate<=5.0d);
+        CommonResponseEnum.NOT_EXISTS.message("不存在的评分范围").assertFalse(sRate>=0.0d && sRate<=5.0d);
+        CommonResponseEnum.NOT_EXISTS.message("不存在的评分范围").assertFalse(fRate>=0.0d && fRate<=5.0d);
 
-        CommonResponseEnum.EXISTS.message("该订单已存在评论").assertTrue(count(wrapper)>0);
+        CommonResponseEnum.EXISTS.message("该订单已评论").assertTrue(count(wrapper)>0);
         // todo sa-token中填充用户id
         reviews.setUserId(userId);
         save(reviews);
@@ -75,9 +84,14 @@ public class ReviewsServiceImpl extends ServiceImpl<ReviewsMapper, Reviews> impl
         Long userId = 1L;// todo sa-token中取值
         // 校验
         CommonResponseEnum.INVALID_ID.assertNull(reviews);
-        CommonResponseEnum.INVALID_ID.assertFalse(userId.equals(reviews.getUserId()));
+        CommonResponseEnum.INVALID_ID.message("权限错误").assertFalse(userId.equals(reviews.getUserId()));
 
-        reviews = BeanCopyUtils.copy(dto, Reviews.class);
+        reviews.setComment(dto.getComment()!=null?dto.getComment():reviews.getComment());
+        reviews.setRating(dto.getRating()!=null?dto.getRating():reviews.getRating());
+        reviews.setEnvRate(dto.getEnvRate()!=null?dto.getEnvRate():reviews.getEnvRate());
+        reviews.setFacilitiesRate(dto.getFacilitiesRate()!=null?dto.getFacilitiesRate():reviews.getFacilitiesRate());
+        reviews.setHealthRate(dto.getHealthRate()!=null?dto.getHealthRate():reviews.getHealthRate());
+        reviews.setServiceRate(dto.getServiceRate()!=null?dto.getServiceRate():reviews.getServiceRate());
         saveOrUpdate(reviews);
     }
 
@@ -134,6 +148,9 @@ public class ReviewsServiceImpl extends ServiceImpl<ReviewsMapper, Reviews> impl
         }
         if (Utils.isNotNull(dto.getCreatedAtStart()) && Utils.isNotNull(dto.getCreatedAtEnd())) {
             wrapper.between(Reviews::getCreatedAt, dto.getCreatedAtStart(), dto.getCreatedAtEnd());
+        }
+        if (Utils.isNotNull(dto.getRatingCeil()) && Utils.isNotNull(dto.getRatingFloor())) {
+            wrapper.between(Reviews::getRating, dto.getRatingCeil(), dto.getRatingFloor());
         }
         return wrapper;
     }

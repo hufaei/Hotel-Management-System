@@ -48,6 +48,7 @@ router:
     - "/wechat/**"
     - "/users"
     - "/users/**"
+    - "/users/**/**"
     - "/rooms"
     - "/rooms/**"
     - "/hotel-owners"

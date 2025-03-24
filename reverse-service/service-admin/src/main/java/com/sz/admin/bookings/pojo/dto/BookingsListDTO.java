@@ -22,11 +22,14 @@ public class BookingsListDTO extends PageQuery {
     @Schema(description =  "关联的用户ID")
     private Long userId;
 
+    @Schema(description ="预订ID")
+    private Long bookingId;
+
     @Schema(description =  "关联的酒店ID")
-    private Long hotelId;
+    private String hotelId;
 
     @Schema(description ="房型ID")
-    private Long roomTypeId;
+    private String roomTypeId;
 
     @Schema(description ="预订数量")
     private Long bookCount;

@@ -20,10 +20,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class BookingsCreateDTO {
 
    @Schema(description =  "关联的酒店ID")
-   private Long hotelId;
+   private String hotelId;
 
    @Schema(description ="房型ID")
-   private Long roomTypeId;
+   private String roomTypeId;
 
    @Schema(description ="预留用户的手机号码")
    private String userPhone;

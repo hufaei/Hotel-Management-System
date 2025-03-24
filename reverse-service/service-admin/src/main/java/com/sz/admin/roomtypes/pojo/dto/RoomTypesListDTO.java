@@ -1,6 +1,5 @@
 package com.sz.admin.roomtypes.pojo.dto;
 
-import com.sz.platform.enums.RoomType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import com.sz.core.common.entity.PageQuery;
@@ -23,7 +22,7 @@ public class RoomTypesListDTO extends PageQuery {
     private Long hotelId;
 
     @Schema(description =  "房型类型")
-    private RoomType roomType;
+    private String roomType;
 
     @Schema(description =  "房型记录创建时间开始")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")

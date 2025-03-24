@@ -6,27 +6,15 @@
 
 # 简介
 
-> 接触了很多优秀的开源和闭源项目，在使用过程中也发现一些问题，不甘满足的我遂产生了想法：于是利用休息时间编写了一套后台管理系统，它**灵活、简洁、高效**，拥抱最新的技术，因此**Sz-Admin**便诞生了，也意为升职Admin，升职加薪节节高。
+> 
 
-**[Sz Admin](https://szadmin.cn/)** ，一个基于 Spring Boot 3、Vue 3 和 Element-Plus 的开源中后台管理框架，致力于为您提供一个流畅、直观且功能强大的开发框架。它不仅融合了最新的技术趋势，而且通过精心设计，确保了系统的简洁性和高效，让使用者可以专注业务。
-
+*** dist文件夹为地理位置数据——来自开源项目：Administrative-divisions-of-China ***
+文件数据来自data.sqlite文件
+数据迁移到MySql建议使用：python脚本--sqlite3mysql（用法自行了解）
 
 
 ## 在线体验
 
-- 官网地址：https://szadmin.cn
-- 文档地址：https://szadmin.cn/md/Help/doc/start.html
-- 预览地址：https://preview.szadmin.cn
-- 代码仓库：
-    - 前端：
-      - **Github**：**[sz-admin](https://github.com/feiyuchuixue/sz-admin.git)**
-      - **Gitee**：**[sz-admin](https://gitee.com/feiyuchuixue/sz-admin.git)**
-    - 后端：
-      - **Github**：**[sz-boot-parent](https://github.com/feiyuchuixue/sz-boot-parent.git)**
-      - **Gitee**：**[sz-boot-parent](https://gitee.com/feiyuchuixue/sz-boot-parent.git)**
-    - 部署：
-      - **Github**：**[sz-deploy](https://github.com/feiyuchuixue/sz-deploy.git)**
-      - **Gitee**：**[sz-deploy](https://gitee.com/feiyuchuixue/sz-deploy.git)**
 
 ## 系统要求
 
@@ -52,3 +40,7 @@
 - **Element-Plus**：一个基于 Vue 3 的组件库，提供了一系列高质量的 UI 组件，帮助开发者快速构建美观、功能完备的用户界面。
 
 ## 功能列表
+## 致谢
+https://github.com/modood/Administrative-divisions-of-China
+https://www.cnopendata.com
+https://github.com/feiyuchuixue/sz-boot-parent

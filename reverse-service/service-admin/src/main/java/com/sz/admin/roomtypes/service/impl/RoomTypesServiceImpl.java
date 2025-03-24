@@ -59,10 +59,10 @@ public class RoomTypesServiceImpl extends ServiceImpl<RoomTypesMapper, RoomTypes
         RoomTypes roomTypes = getById(dto.getRoomTypeId());
         CommonResponseEnum.INVALID_ID.assertNull(roomTypes);
         // photoUrl后续单独接口修改上传图片
-        roomTypes.setCapacity(dto.getCapacity());
-        roomTypes.setPrice(dto.getPrice());
-        roomTypes.setDescription(dto.getDescription());
-        roomTypes.setSize(dto.getSize());
+        roomTypes.setInfo(dto.getInfo()!=null?dto.getInfo():roomTypes.getInfo());
+        roomTypes.setPrice(dto.getPrice()!=null?dto.getPrice():roomTypes.getPrice());
+        roomTypes.setPhotoUrls(dto.getPhotoUrls()!=null?dto.getPhotoUrls():roomTypes.getPhotoUrls());
+        roomTypes.setDescription(dto.getDescription()!=null?dto.getDescription():roomTypes.getDescription());
 
         saveOrUpdate(roomTypes);
     }

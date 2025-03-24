@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import com.sz.core.common.entity.PageQuery;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.format.annotation.DateTimeFormat;
 /**
@@ -24,13 +25,26 @@ public class HotelsListDTO extends PageQuery {
     @Schema(description =  "酒店名称")
     private String hotelName;
 
+    @Schema(description ="所属省份")
+    private String province;
+
+    @Schema(description ="所属市区")
+    private String city;
+
+    @Schema(description ="所属县")
+    private String country;
+
+    @Schema(description ="酒店星级")
+    private Integer stars;
+
     @Schema(description =  "酒店地址")
     private String address;
 
-    @Schema(description =  "酒店纬度信息")
-    private BigDecimal latitude;
+    @Schema(description =  "开业年限开始")
+    private LocalDate openingDateStart;
 
-    @Schema(description =  "酒店经度信息")
-    private BigDecimal longitude;
+    @Schema(description =  "开业年限结束")
+    private LocalDate openingDateEnd;
+
 
 }

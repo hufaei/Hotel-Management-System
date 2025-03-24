@@ -1,4 +1,22 @@
 spring:
+  mail:
+    host: smtp.qq.com
+    port: 465  # 必须使用SSL端口
+    username: 2857655149@qq.com  # 需与发件人一致
+    password: opaolwmmwfsddecf  # 替换为实际授权码
+    protocol: smtp
+    default-encoding: UTF-8
+    properties:
+      mail.smtp:
+        auth: true
+        ssl:
+          enable: true  # 强制SSL加密
+          trust: smtp.qq.com
+        connectiontimeout: 5000
+        timeout: 3000
+        socketFactory:
+          class: javax.net.ssl.SSLSocketFactory
+
   threads:
     virtual:
       # 启用虚拟线程

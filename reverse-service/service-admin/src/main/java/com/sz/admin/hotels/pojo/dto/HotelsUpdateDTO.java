@@ -24,18 +24,24 @@ public class HotelsUpdateDTO {
     @Schema(description =  "酒店名称")
     private String hotelName;
 
-    @Schema(description =  "酒店地址")
+    @Schema(description ="酒店英文名称")
+    private String englishName;
+
+    @Schema(description ="房间数量")
+    private Integer roomCount;
+
+    @Schema(description ="酒店联系电话")
+    private String contactPhone;
+
+    @Schema(description ="酒店地址")
     private String address;
 
-    @Schema(description =  "酒店纬度信息")
-    private BigDecimal latitude;
+    @Schema(description ="酒店描述")
+    private String description;
 
-    @Schema(description =  "酒店经度信息")
-    private BigDecimal longitude;
+    @Schema(description ="交通描述")
+    private String traffic;
 
-    @Schema(description =  "酒店联系邮箱")
-    private String contactEmail;
-
-    @Schema(description =  "酒店联系电话")
-    private String contactPhone;
+    @Schema(description ="房型列表")
+    private String roomTypeList;
 }

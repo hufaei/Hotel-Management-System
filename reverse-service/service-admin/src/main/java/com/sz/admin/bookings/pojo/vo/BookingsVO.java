@@ -27,11 +27,11 @@ public class BookingsVO {
 
     @ExcelProperty(value = "关联的酒店ID")
     @Schema(description =  "关联的酒店ID")
-    private Long hotelId;
+    private String hotelId;
 
     @ExcelProperty(value = "房型ID")
     @Schema(description ="房型ID")
-    private Long roomTypeId;
+    private String roomTypeId;
 
     @Schema(description ="预订数量")
     private Long bookCount;

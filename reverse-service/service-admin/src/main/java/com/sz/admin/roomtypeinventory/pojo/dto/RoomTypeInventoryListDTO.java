@@ -17,7 +17,7 @@ import java.time.LocalDate;
 public class RoomTypeInventoryListDTO extends PageQuery {
 
     @Schema(description =  "关联的房型ID")
-    private Long roomTypeId;
+    private String roomTypeId;
 
     @Schema(description =  "日期")
     private LocalDate date;

@@ -1,6 +1,7 @@
 package com.sz.admin.users.service.impl;
 
 import cn.dev33.satoken.secure.BCrypt;
+import cn.dev33.satoken.stp.StpUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.mybatisflex.core.query.QueryChain;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
@@ -11,6 +12,8 @@ import com.sz.core.util.*;
 import com.sz.redis.CommonKeyConstants;
 import com.sz.redis.RedisCache;
 import com.sz.redis.RedisUtils;
+import com.sz.security.pojo.PasswordResetVo;
+import com.sz.security.service.ResetAuthService;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -31,12 +34,6 @@ import java.util.function.Consumer;
 import com.sz.admin.users.pojo.dto.UsersCreateDTO;
 import com.sz.admin.users.pojo.dto.UsersUpdateDTO;
 import com.sz.admin.users.pojo.dto.UsersListDTO;
-import com.sz.admin.users.pojo.dto.UsersImportDTO;
-import com.sz.excel.core.ExcelResult;
-import jakarta.servlet.ServletOutputStream;
-import jakarta.servlet.http.HttpServletResponse;
-import com.sz.excel.utils.ExcelUtils;
-import lombok.SneakyThrows;
 import com.sz.admin.users.pojo.vo.UsersVO;
 
 /**
@@ -49,7 +46,7 @@ import com.sz.admin.users.pojo.vo.UsersVO;
  */
 @Service
 @RequiredArgsConstructor
-public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements UsersService {
+public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements UsersService, ResetAuthService {
 
     private final RedisCache redisCache;
 
@@ -123,26 +120,6 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         return BeanCopyUtils.copy(user, UsersVO.class);
     }
 
-
-//    @SneakyThrows
-//    @Override
-//    public void importExcel(ImportExcelDTO dto) {
-//        ExcelResult<UsersImportDTO> excelResult = ExcelUtils.importExcel(dto.getFile().getInputStream(), UsersImportDTO.class, true);
-//        List<UsersImportDTO> list = excelResult.getList();
-//        List<String> errorList = excelResult.getErrorList();
-//        String analysis = excelResult.getAnalysis();
-//        System.out.println(" analysis : " + analysis);
-//        System.out.println(" isCover : " + dto.getIsCover());
-//    }
-//
-//    @SneakyThrows
-//    @Override
-//    public void exportExcel(UsersListDTO dto, HttpServletResponse response) {
-//        List<UsersVO> list = list(dto);
-//        ServletOutputStream os = response.getOutputStream();
-//        ExcelUtils.exportExcel(list, "用户信息表", UsersVO.class, os);
-//    }
-
     private static QueryWrapper buildQueryWrapper(UsersListDTO dto) {
         QueryWrapper wrapper = QueryWrapper.create().from(Users.class);
         if (Utils.isNotNull(dto.getUserId())) {
@@ -207,4 +184,15 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         return loginUser;
     }
 
+    @Override
+    public void resetPassword(PasswordResetVo resetVo) {
+        Long loginId = (Long) StpUtil.getLoginId();
+        QueryWrapper wrapper = QueryWrapper.create().from(Users.class);
+        wrapper.eq(Users::getUsername, resetVo.getUsername());
+        Users user = getOne(wrapper);
+        CommonResponseEnum.INVALID_TOKEN.assertFalse(user.getUserId().equals(loginId));
+
+        user.setPasswordHash(getEncoderPwd(resetVo.getNewPwd()));
+
+    }
 }
