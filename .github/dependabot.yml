@@ -8,6 +8,6 @@ updates:
   - package-ecosystem: "maven" # See documentation for possible values
     directory: "/hotel-dependencies" # Location of package manifests
     schedule:
-      interval: "weekly"
+      interval: "monthly" # See documentation for possible values
     target-branch: main    # 指定要检查的目标分支
     open-pull-requests-limit: 20  # 限制同时打开的PR数量

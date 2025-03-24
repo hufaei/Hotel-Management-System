@@ -1,11 +1,15 @@
 package com.sz.admin.users.controller;
 
-import com.sz.admin.bookings.pojo.vo.BookingsVO;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.sz.admin.users.pojo.po.Users;
+import com.sz.core.common.enums.CommonResponseEnum;
+import com.sz.core.util.EmailUtils;
+import com.sz.core.util.ValidateCodeUtils;
+import com.sz.security.service.EmailCodeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +23,8 @@ import com.sz.admin.users.pojo.dto.UsersCreateDTO;
 import com.sz.admin.users.pojo.dto.UsersUpdateDTO;
 import com.sz.admin.users.pojo.dto.UsersListDTO;
 import com.sz.admin.users.pojo.vo.UsersVO;
-import com.sz.core.common.entity.ImportExcelDTO;
-import jakarta.servlet.http.HttpServletResponse;
+
+import java.util.Map;
 
 /**
  * <p>
@@ -37,6 +41,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class UsersController  {
 
     private final UsersService usersService;
+    private final EmailCodeService emailCodeService;
 
     @Operation(summary = "新增（注册）")
     @PostMapping
@@ -79,18 +84,44 @@ public class UsersController  {
         return ApiResult.success(usersService.detail(id));
     }
 
-//    @Operation(summary = "导入")
-//    @Parameters({
-//      @Parameter(name = "file", description = "上传文件", schema = @Schema(type = "string", format = "binary"), required = true),
-//    })
-//    @PostMapping("/import")
-//    public void importExcel(@ModelAttribute ImportExcelDTO dto) {
-//        usersService.importExcel(dto);
-//    }
-//
-//    @Operation(summary = "导出")
-//    @PostMapping("/export")
-//    public void exportExcel(@RequestBody UsersListDTO dto, HttpServletResponse response) {
-//        usersService.exportExcel(dto, response);
-//    }
+    @Operation(summary = "发送验证码")
+    @GetMapping("/sendEmail/{email}")
+    public ApiResult<Boolean> sendEmail(@PathVariable("email") String email) throws MessagingException {
+        Integer authCode = ValidateCodeUtils.generateValidateCode();
+        EmailUtils.sendHtmlEmail(email, String.valueOf(authCode));
+
+        // 存储验证码到Redis，5分钟过期
+        emailCodeService.saveAuthCode(email, String.valueOf(authCode));
+        return ApiResult.success(true);
+    }
+
+    @Operation(summary = "验证码校验")
+    @PostMapping("/verifyCode")
+    public ApiResult<Boolean> verifyCode(@RequestBody Map<String, String> requestBody) {
+        String email = requestBody.get("Remail");
+        String code = requestBody.get("code");
+        System.out.println(requestBody);
+
+        // 从Redis中获取验证码
+        String redisCode = emailCodeService.getAuthCode(email);
+
+        emailCodeService.deleteAuthCode(email);
+        CommonResponseEnum.INVALID_TOKEN.message("验证码错误").assertFalse(code.equals(redisCode));
+        // 验证后删除验证码，防止重复使用
+        emailCodeService.deleteAuthCode(email);
+
+
+        return ApiResult.success(true);
+    }
+    @Operation(summary = "邮箱校验")
+    @GetMapping("/verifyEmail/{email}")
+    public ApiResult<Boolean> verifyEmail(@PathVariable("email") String email) {
+        // 检查邮箱是否存在
+        QueryWrapper wrapper = QueryWrapper.create().from(Users.class);
+        wrapper.eq(Users::getEmail, email);
+        Users user = usersService.getOne(wrapper);
+        CommonResponseEnum.INVALID_TOKEN.assertNull(user, "邮箱不存在");
+
+        return ApiResult.success(true);
+    }
 }
