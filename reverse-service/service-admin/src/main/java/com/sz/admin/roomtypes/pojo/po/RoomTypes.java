@@ -35,7 +35,7 @@ public class RoomTypes implements Serializable {
     private String roomType;
 
     @Schema(description ="房型起步价，单位：元")
-    private Long price;
+    private Double price;
 
     @Schema(description ="房型照片URL列表，存储为JSON数组")
     private String photoUrls;

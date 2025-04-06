@@ -3,6 +3,7 @@ package com.sz.admin.hotels.service.impl;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.sz.admin.hotelowners.pojo.po.HotelOwners;
 import com.sz.admin.hotelowners.service.HotelOwnersService;
+import com.sz.admin.reviews.service.ReviewsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.sz.admin.hotels.service.HotelsService;
@@ -46,6 +47,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class HotelsServiceImpl extends ServiceImpl<HotelsMapper, Hotels> implements HotelsService {
 
     private final HotelOwnersService hotelOwnersService;
+    // 循环引用
+//    private final ReviewsService reviewsService;
+
 
     @Transactional
     @Override
@@ -138,6 +142,12 @@ public class HotelsServiceImpl extends ServiceImpl<HotelsMapper, Hotels> impleme
         List<HotelsVO> list = list(dto);
         ServletOutputStream os = response.getOutputStream();
         ExcelUtils.exportExcel(list, "酒店信息表", HotelsVO.class, os);
+    }
+
+    @Override
+    public double getAvgScore(String hotelId) {
+        // todo 计算平均分
+        return 0;
     }
 
     private static QueryWrapper buildQueryWrapper(HotelsListDTO dto) {

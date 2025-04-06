@@ -23,6 +23,6 @@ public class PaymentCreateDTO {
    private Long bookingId;
 
    @Schema(description =  "支付金额，单位为元")
-   private Long amount;
+   private Double amount;
 
 }

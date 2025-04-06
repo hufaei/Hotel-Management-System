@@ -15,7 +15,7 @@ import lombok.Data;
 public class RoomTypesCreateDTO {
 
    @Schema(description =  "关联的酒店ID")
-   private Long hotelId;
+   private String hotelId;
 
    @Schema(description =  "房型ID")
    private String roomTypeId;
@@ -24,7 +24,7 @@ public class RoomTypesCreateDTO {
    private String roomType;
 
    @Schema(description =  "房型起步价，单位为元")
-   private Long price;
+   private Double price;
 
    @Schema(description =  "房型照片URL列表，存储为JSON数组")
    private String photoUrls;

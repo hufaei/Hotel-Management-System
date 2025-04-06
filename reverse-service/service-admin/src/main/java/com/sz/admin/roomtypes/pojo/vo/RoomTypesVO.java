@@ -20,7 +20,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class RoomTypesVO {
 
     @Schema(description =  "房型ID")
-    private Long roomTypeId;
+    private String roomTypeId;
 
     @ExcelProperty(value = "关联的酒店ID")
     @Schema(description =  "关联的酒店ID")
@@ -32,7 +32,7 @@ public class RoomTypesVO {
 
     @ExcelProperty(value = "房型起步价，单位：元")
     @Schema(description ="房型起步价，单位：元")
-    private Long price;
+    private Double price;
 
     @ExcelProperty(value = "房型照片URL列表，存储为JSON数组")
     @Schema(description =  "房型照片URL列表，存储为JSON数组")

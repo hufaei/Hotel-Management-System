@@ -38,4 +38,5 @@ public interface HotelsService extends IService<Hotels> {
 
     void exportExcel(HotelsListDTO dto, HttpServletResponse response);
 
+    double getAvgScore(String hotelId);
 }

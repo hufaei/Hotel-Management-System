@@ -6,7 +6,7 @@ spring:
       host: 127.0.0.1
       port: 6379
       # 数据索引
-      database: 1
+      database: 2
       # 连接超时时间（毫秒）
       timeout: 50000
       ###连接池配置###

@@ -20,6 +20,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Data
 @Schema(description = "Bookings返回vo")
 public class BookingsVO {
+    @Schema(description =  "BookingID")
+    private Long bookingId;
 
     @ExcelProperty(value = "关联的用户ID")
     @Schema(description =  "关联的用户ID")

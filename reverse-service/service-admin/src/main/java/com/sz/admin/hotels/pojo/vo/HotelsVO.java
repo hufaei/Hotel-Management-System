@@ -22,7 +22,7 @@ public class HotelsVO {
 
     @ExcelIgnore
     @Schema(description =  "酒店ID")
-    private Long hotelId;
+    private String hotelId;
 
     @ExcelProperty(value = "酒店名称")
     @Schema(description =  "酒店名称")
@@ -87,6 +87,9 @@ public class HotelsVO {
     @ExcelProperty(value = "房型列表")
     @Schema(description ="房型列表")
     private String roomTypeList;
+
+    @Schema(description ="外观照片")
+    private String img;
 
     @ExcelProperty(value = "酒店添加时间")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")

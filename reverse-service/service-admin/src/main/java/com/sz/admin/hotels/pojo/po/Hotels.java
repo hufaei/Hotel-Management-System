@@ -80,4 +80,7 @@ public class Hotels implements Serializable {
     @Schema(description ="酒店添加时间")
     private LocalDateTime createdAt;
 
+    @Schema(description ="外观照片")
+    private String img;
+
 }

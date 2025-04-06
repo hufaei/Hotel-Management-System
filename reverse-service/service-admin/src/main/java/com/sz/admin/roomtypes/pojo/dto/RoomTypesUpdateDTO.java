@@ -22,7 +22,7 @@ public class RoomTypesUpdateDTO {
     private String roomTypeId;
 
     @Schema(description =  "房型价格，单位为元")
-    private Long price;
+    private Double price;
 
     @Schema(description =  "房型照片URL列表，存储为JSON数组")
     private String photoUrls;

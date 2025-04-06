@@ -99,7 +99,7 @@ public class BookingsServiceImpl extends ServiceImpl<BookingsMapper, Bookings> i
         bookings.setStatus(BookingStatus.PENDING_CONFIRMATION);
         save(bookings);
         // 3.支付单创建
-        Long total = daysBetween*roomTypes.getPrice()*bcount;
+        Double total = daysBetween*roomTypes.getPrice()*bcount;
         PaymentCreateDTO pdto = new PaymentCreateDTO();
         pdto.setBookingId(bookings.getBookingId());
         pdto.setAmount(total);
