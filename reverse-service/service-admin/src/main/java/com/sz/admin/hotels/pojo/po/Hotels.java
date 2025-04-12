@@ -83,4 +83,7 @@ public class Hotels implements Serializable {
     @Schema(description ="外观照片")
     private String img;
 
+    @Schema(description = "起价")
+    private BigDecimal minPrice;
+
 }

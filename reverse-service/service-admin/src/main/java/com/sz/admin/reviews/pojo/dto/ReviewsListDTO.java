@@ -18,7 +18,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class ReviewsListDTO extends PageQuery {
 
     @Schema(description =  "关联的预订ID")
-    private Long bookingId;
+    private String HotelId;
 
     @Schema(description =  "评价用户ID")
     private Long userId;

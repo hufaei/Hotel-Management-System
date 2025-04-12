@@ -1,6 +1,7 @@
 package com.sz.admin.reviews.service;
 
 import com.mybatisflex.core.service.IService;
+import com.sz.admin.bookings.pojo.vo.UserTotalBookingVO;
 import com.sz.admin.reviews.pojo.po.Reviews;
 import com.sz.core.common.entity.SelectIdsDTO;
 import com.sz.core.common.entity.PageResult;
@@ -38,4 +39,5 @@ public interface ReviewsService extends IService<Reviews> {
 
     void exportExcel(ReviewsListDTO dto, HttpServletResponse response);
 
+    UserTotalBookingVO getUserTotalVo(Long id,String bookingId);
 }

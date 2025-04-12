@@ -35,6 +35,7 @@ public enum CommonResponseEnum implements BusinessExceptionCustomAssert {
     INVALID(1008, "无效的数据"),
 
     UNKNOWN(9999, "未知异常"),
+    NOLOGIN(2233, "请先登录"),
     ;
     // @formatter:on
 

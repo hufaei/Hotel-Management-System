@@ -86,7 +86,7 @@ public class RoomTypesServiceImpl extends ServiceImpl<RoomTypesMapper, RoomTypes
 
     @Override
     public RoomTypesVO detail(Object id){
-        RoomTypes roomTypes = getById((Serializable) id);
+        RoomTypes roomTypes = getById((String) id);
         CommonResponseEnum.INVALID_ID.assertNull(roomTypes);
         return BeanCopyUtils.copy(roomTypes, RoomTypesVO.class);
     }

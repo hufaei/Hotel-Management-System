@@ -46,5 +46,8 @@ public class HotelsListDTO extends PageQuery {
     @Schema(description =  "开业年限结束")
     private LocalDate openingDateEnd;
 
+    @Schema(description = "起价")
+    private BigDecimal minPrice;
+
 
 }

@@ -1,5 +1,7 @@
 package com.sz.admin.reviews.controller;
 
+import com.sz.admin.bookings.pojo.vo.BookingsVO;
+import com.sz.admin.bookings.pojo.vo.UserTotalBookingVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -70,6 +72,12 @@ public class ReviewsController  {
     @GetMapping("/{id}")
     public ApiResult<ReviewsVO> detail(@PathVariable Object id) {
         return ApiResult.success(reviewsService.detail(id));
+    }
+
+    @Operation(summary = "用户视图详情")
+    @GetMapping("/user/{id}/{bookingId}")
+    public ApiResult<UserTotalBookingVO> userTotal(@PathVariable Long id,@PathVariable String bookingId) {
+        return ApiResult.success(reviewsService.getUserTotalVo(id,bookingId));
     }
 
 }

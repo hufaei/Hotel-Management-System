@@ -96,4 +96,7 @@ public class HotelsVO {
     @Schema(description =  "酒店添加时间")
     private LocalDateTime createdAt;
 
+    @Schema(description = "起价")
+    private BigDecimal minPrice;
+
 }

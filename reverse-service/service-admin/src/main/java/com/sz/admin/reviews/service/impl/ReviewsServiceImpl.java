@@ -1,10 +1,16 @@
 package com.sz.admin.reviews.service.impl;
 
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+import com.sz.admin.bookings.pojo.dto.BookingsListDTO;
 import com.sz.admin.bookings.pojo.po.Bookings;
+import com.sz.admin.bookings.pojo.vo.BookingsVO;
+import com.sz.admin.bookings.pojo.vo.UserTotalBookingVO;
 import com.sz.admin.bookings.service.BookingsService;
 import com.sz.admin.hotelowners.service.HotelOwnersService;
+import com.sz.admin.roomtypes.pojo.vo.RoomTypesVO;
+import com.sz.admin.roomtypes.service.RoomTypesService;
 import com.sz.admin.users.pojo.po.Users;
+import com.sz.admin.users.pojo.vo.UsersVO;
 import com.sz.admin.users.service.UsersService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +28,8 @@ import com.sz.core.common.entity.PageResult;
 import com.sz.core.common.entity.SelectIdsDTO;
 import java.io.Serializable;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import com.sz.admin.reviews.pojo.dto.ReviewsCreateDTO;
 import com.sz.admin.reviews.pojo.dto.ReviewsUpdateDTO;
 import com.sz.admin.reviews.pojo.dto.ReviewsListDTO;
@@ -47,6 +55,7 @@ import com.sz.admin.reviews.pojo.vo.ReviewsVO;
 public class ReviewsServiceImpl extends ServiceImpl<ReviewsMapper, Reviews> implements ReviewsService {
 
     private final UsersService usersService;
+    private final RoomTypesService roomTypesService;
     private final BookingsService bookingsService;
 
     @Override
@@ -138,10 +147,32 @@ public class ReviewsServiceImpl extends ServiceImpl<ReviewsMapper, Reviews> impl
         ExcelUtils.exportExcel(list, "用户评价表", ReviewsVO.class, os);
     }
 
-    private static QueryWrapper buildQueryWrapper(ReviewsListDTO dto) {
+    @Override
+    public UserTotalBookingVO getUserTotalVo(Long id,String bookingId) {
+        UserTotalBookingVO bookingVO = new UserTotalBookingVO();
+        bookingVO.setUserId(id);
+
         QueryWrapper wrapper = QueryWrapper.create().from(Reviews.class);
-        if (Utils.isNotNull(dto.getBookingId())) {
-            wrapper.eq(Reviews::getBookingId, dto.getBookingId());
+        wrapper.eq(Reviews::getUserId, id);
+        bookingVO.setCount(count(wrapper));
+        String roomTypeId = bookingsService.detail(bookingId).getRoomTypeId();
+        RoomTypesVO roomTypesVO = roomTypesService.detail(roomTypeId);
+        UsersVO usersVO = usersService.detail(id);
+        bookingVO.setUserName(usersVO.getUsername());
+        bookingVO.setRoomType(roomTypesVO.getRoomType());
+        return bookingVO;
+    }
+
+    private QueryWrapper buildQueryWrapper(ReviewsListDTO dto) {
+        QueryWrapper wrapper = QueryWrapper.create().from(Reviews.class);
+        if (Utils.isNotNull(dto.getHotelId())) {
+            BookingsListDTO bookingsListDTO = new BookingsListDTO();
+            bookingsListDTO.setHotelId(dto.getHotelId());
+            List<Long> idList = bookingsService.list(bookingsListDTO).stream()
+                    .map(BookingsVO::getBookingId)
+                    .collect(Collectors.toList());
+            idList.add(-1L);
+            wrapper.in(Reviews::getBookingId, idList);
         }
         if (Utils.isNotNull(dto.getUserId())) {
             wrapper.eq(Reviews::getUserId, dto.getUserId());

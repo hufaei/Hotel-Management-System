@@ -1,26 +1,30 @@
 package com.sz.admin.hotels.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.sz.admin.hotels.mapper.HotelsMapper;
+import com.sz.admin.hotels.pojo.HotelDocument;
 import com.sz.admin.hotels.pojo.po.Hotels;
+//import com.sz.admin.hotels.service.HotelIndexService;
+import com.sz.admin.hotels.service.HotelIndexService;
 import com.sz.admin.hotels.service.RecommendService;
-import com.sz.admin.roomtypes.pojo.dto.RoomTypesListDTO;
-import com.sz.admin.roomtypes.pojo.po.RoomTypes;
-import com.sz.admin.roomtypes.pojo.vo.RoomTypesVO;
 import com.sz.admin.roomtypes.service.RoomTypesService;
+import com.sz.core.common.enums.CommonResponseEnum;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import lombok.RequiredArgsConstructor;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 import com.sz.core.common.entity.ApiPageResult;
 import com.sz.core.common.entity.ApiResult;
-import com.sz.core.common.constant.GlobalConstant;
 import com.sz.core.common.entity.PageResult;
 import com.sz.core.common.entity.SelectIdsDTO;
 import com.sz.admin.hotels.service.HotelsService;
@@ -28,10 +32,9 @@ import com.sz.admin.hotels.pojo.dto.HotelsCreateDTO;
 import com.sz.admin.hotels.pojo.dto.HotelsUpdateDTO;
 import com.sz.admin.hotels.pojo.dto.HotelsListDTO;
 import com.sz.admin.hotels.pojo.vo.HotelsVO;
-import com.sz.core.common.entity.ImportExcelDTO;
-import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -50,9 +53,10 @@ public class HotelsController  {
 
     private final HotelsService hotelsService;
     private final RedisTemplate redisTemplate;
+    private final HotelIndexService hotelIndexService;
     private final RecommendService recommendService;
-    private final HotelsMapper hotelMapper; // 请确保已正确注入
     private final RoomTypesService roomTypesService;
+    private final ElasticsearchOperations elasticsearchOperations;
 
     @Operation(summary = "新增")
     @PostMapping
@@ -87,11 +91,19 @@ public class HotelsController  {
         return ApiResult.success(hotelsService.detail(id));
     }
 
-    @Operation(summary = "测试")
-    @GetMapping("/hotels")
-    public List<String> getRecommendHotels(@RequestParam Long userId) {
-
-        recommendService.asyncCalculateRecommend(userId);
+    @Operation(summary = "获取推荐")
+    @GetMapping("/getRecommend")
+    public ApiResult<PageResult<String>> getRecommendHotels() {
+        boolean isLogin = StpUtil.isLogin();
+        List<String> recommendHotels;
+        if (!isLogin) {
+            recommendHotels = redisTemplate.opsForList()
+                    .range("recommend:model:" + 1 + ":hotels", 0, -1);
+            return ApiPageResult.success(recommendHotels);
+        }
+        Long userId = (Long) StpUtil.getLoginId();
+//        log.info("user get recommend, id: {}", userId);
+//        recommendService.asyncCalculateRecommend(userId);
         // 1.检查是否已有推荐结果
         Integer modelId = (Integer) redisTemplate.opsForValue().get("recommend:user:" + userId);
         if (modelId == null) {
@@ -99,9 +111,84 @@ public class HotelsController  {
             Random random = new Random();
             modelId = random.nextInt(10) + 1;
         }
-
-        // 2.从对应模型获取推荐列表
-        return redisTemplate.opsForList()
+        recommendHotels = redisTemplate.opsForList()
                 .range("recommend:model:" + modelId + ":hotels", 0, -1);
+        // 2.从对应模型获取推荐列表
+        return ApiPageResult.success(recommendHotels);
+    }
+    @Operation(summary = "酒店收藏")
+    @GetMapping("/collect/{hotelId}")
+    public ApiResult collectHotel(@PathVariable String hotelId) {
+        // 检查是否登录
+        if (!StpUtil.isLogin()) {
+            return ApiResult.error(CommonResponseEnum.NOLOGIN);
+        }
+        Long userId = (Long) StpUtil.getLoginId();
+        redisTemplate.opsForSet().add("collection:" + userId, hotelId);
+        return ApiResult.success("收藏成功");
+    }
+    @Operation(summary = "酒店取消收藏")
+    @GetMapping("/disCollect/{hotelId}")
+    public ApiResult disCollectHotel(@PathVariable String hotelId) {
+        // 检查是否登录
+        if (!StpUtil.isLogin()) {
+            return ApiResult.error(CommonResponseEnum.NOLOGIN);
+        }
+        Long userId = (Long) StpUtil.getLoginId();
+        redisTemplate.opsForSet().remove("collection:" + userId, hotelId);
+        return ApiResult.success("收藏成功");
+    }
+
+    @Operation(summary = "酒店收藏列表")
+    @GetMapping("/collection")
+    public List<HotelsVO> collectList() {
+        // 检查是否登录
+        CommonResponseEnum.NOLOGIN.assertTrue(!StpUtil.isLogin());
+        Long userId = (Long) StpUtil.getLoginId();
+        // 从 redis 中获取用户收藏的酒店 ID 集合
+        Set<String> hotelIds = redisTemplate.opsForSet().members("collection:" + userId);
+        if (hotelIds == null || hotelIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        // 使用 MybatisFlex 的 in 查询来获取收藏的酒店列表
+        QueryWrapper wrapper = new QueryWrapper().from(Hotels.class);
+        wrapper.in("hotel_id", hotelIds);
+        return hotelsService.objListAs(wrapper,HotelsVO.class);
+    }
+
+
+//    /**
+//     * 触发数据库数据索引到 Elasticsearch 的接口
+//     */
+//    @PostMapping("/index")
+//    public ApiResult<String> indexHotels() {
+//        hotelIndexService.indexHotels();
+//        return ApiResult.success("酒店数据已成功索引到 Elasticsearch");
+//    }
+
+    /**
+     * 分词查询接口，根据关键字匹配 ES 文档中的 content 字段，
+     * 返回匹配到的酒店 id 列表
+     */
+    @PostMapping("/search")
+    public List<String> searchHotels(@RequestBody List<String> keywords) {
+        // 构建布尔查询
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        for (String keyword : keywords) {
+            boolQuery.must(QueryBuilders.matchQuery("content", keyword));
+        }
+
+        // 构建查询
+        NativeSearchQuery query = new NativeSearchQueryBuilder()
+                .withQuery(boolQuery)
+                .build();
+
+        // 执行搜索
+        SearchHits<HotelDocument> searchHits = elasticsearchOperations.search(query, HotelDocument.class);
+
+        // 提取并返回结果
+        return searchHits.getSearchHits().stream()
+                .map(hit -> hit.getContent().getId())
+                .collect(Collectors.toList());
     }
 }

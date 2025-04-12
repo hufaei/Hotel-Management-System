@@ -1,5 +1,6 @@
 package com.sz;
 
+import com.botsuch.rpcstarter.annotation.EnableBot;
 import com.sz.mysql.FlywayProperties;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
@@ -10,11 +11,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.scheduling.annotation.EnableScheduling;
-
 @SpringBootApplication
 @EnableAspectJAutoProxy
 @RequiredArgsConstructor
 @EnableScheduling
+@EnableBot
 public class AdminApplication {
 
     @Value("${app.version}")

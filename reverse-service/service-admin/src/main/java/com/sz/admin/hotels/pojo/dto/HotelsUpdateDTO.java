@@ -44,4 +44,7 @@ public class HotelsUpdateDTO {
 
     @Schema(description ="房型列表")
     private String roomTypeList;
+
+    @Schema(description = "起价")
+    private BigDecimal minPrice;
 }
