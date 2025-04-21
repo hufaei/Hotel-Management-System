@@ -6,6 +6,8 @@ import lombok.Data;
 import java.io.Serializable;
 import java.io.Serial;
 import com.sz.mysql.EntityChangeListener;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -46,5 +48,9 @@ public class Users implements Serializable {
     @Column(isLogicDelete = true)
     @Schema(description ="删除标识，0为未删除，1为已删除")
     private String isDeleted;
+    @Schema(description =  "余额")
+    private BigDecimal balance;
+    @Schema(description =  "冻结余额")
+    private BigDecimal freeze;
 
 }

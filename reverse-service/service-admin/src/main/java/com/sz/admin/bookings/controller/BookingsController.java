@@ -55,12 +55,12 @@ public class BookingsController  {
     // 用户通过取消支付单回退订单
     // 酒店可主动取消订单
     @Operation(summary = "取消")
-    @PutMapping("/cancel")
+    @PostMapping("/cancel")
     public ApiResult cancel(@RequestBody BookingsCancelDTO dto) {
         bookingsService.cancel(dto);
         return ApiResult.success();
     }
-    // 酒店
+    // 酒店退房、订单结束
     @Operation(summary = "结束")
     @PutMapping("/finish")
     public ApiResult finish(@RequestBody BookingsCancelDTO dto) {

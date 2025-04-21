@@ -6,11 +6,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import lombok.RequiredArgsConstructor;
-import cn.dev33.satoken.annotation.SaCheckPermission;
 import org.springframework.web.bind.annotation.*;
 import com.sz.core.common.entity.ApiPageResult;
 import com.sz.core.common.entity.ApiResult;
-import com.sz.core.common.constant.GlobalConstant;
 import com.sz.core.common.entity.PageResult;
 import com.sz.core.common.entity.SelectIdsDTO;
 import com.sz.admin.rooms.service.RoomsService;
@@ -19,7 +17,6 @@ import com.sz.admin.rooms.pojo.dto.RoomsUpdateDTO;
 import com.sz.admin.rooms.pojo.dto.RoomsListDTO;
 import com.sz.admin.rooms.pojo.vo.RoomsVO;
 import com.sz.core.common.entity.ImportExcelDTO;
-import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * <p>
@@ -93,9 +90,13 @@ public class RoomsController  {
         roomsService.importExcel(dto);
     }
 
-    @Operation(summary = "导出")
+//    @Operation(summary = "导出")
+//    @PostMapping("/export")
+//    public void exportExcel(@RequestBody RoomsListDTO dto, HttpServletResponse response) {
+//        roomsService.exportExcel(dto, response);
+//    }
     @PostMapping("/export")
-    public void exportExcel(@RequestBody RoomsListDTO dto, HttpServletResponse response) {
-        roomsService.exportExcel(dto, response);
+    public void exportExcel() throws Exception {
+        roomsService.ontoData();
     }
 }

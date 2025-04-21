@@ -5,6 +5,8 @@ import com.sz.admin.users.pojo.po.Users;
 import com.sz.core.common.entity.LoginUser;
 import com.sz.core.common.entity.SelectIdsDTO;
 import com.sz.core.common.entity.PageResult;
+
+import java.math.BigDecimal;
 import java.util.List;
 import com.sz.admin.users.pojo.dto.UsersCreateDTO;
 import com.sz.admin.users.pojo.dto.UsersUpdateDTO;
@@ -33,10 +35,14 @@ public interface UsersService extends IService<Users> {
 
     void remove(SelectIdsDTO dto);
 
+    void freeze(BigDecimal count);
+
     UsersVO detailByPhoneOremail(String phone);
 
 
     LoginUser buildLoginUser(String username, String password);
 
     UsersVO detail(Object id);
+
+    void unfreeze(BigDecimal amount ,Boolean bool);
 }

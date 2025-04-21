@@ -26,7 +26,7 @@ public class HotelOwners implements Serializable {
 
     @Id(keyType = KeyType.Auto)
     @Schema(description ="酒店后台ID")
-    private Long ownerId;
+    private String ownerId;
 
     @Schema(description ="关联的酒店ID")
     private String hotelId;

@@ -43,4 +43,7 @@ public class BookingsListDTO extends PageQuery {
     @Schema(description =  "预订状态")
     private BookingStatus status;
 
+    @Schema(description ="是否评价")
+    private Boolean isReview;
+
 }

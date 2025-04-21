@@ -1,10 +1,17 @@
 package com.sz.admin.rooms.service.impl;
 
+import cn.dev33.satoken.secure.BCrypt;
 import com.mybatisflex.core.query.QueryChain;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.sz.admin.hotelowners.pojo.po.HotelOwners;
+import com.sz.admin.hotelowners.service.HotelOwnersService;
 import com.sz.admin.hotels.pojo.po.Hotels;
 import com.sz.admin.hotels.service.HotelsService;
+import com.sz.admin.roomtypeinventory.mapper.RoomTypeInventoryMapper;
+import com.sz.admin.roomtypeinventory.pojo.po.RoomTypeInventory;
+import com.sz.admin.roomtypeinventory.service.RoomTypeInventoryService;
+import com.sz.admin.roomtypes.mapper.RoomTypesMapper;
+import com.sz.admin.roomtypes.pojo.po.RoomTypes;
 import com.sz.platform.enums.BookingStatus;
 import com.sz.platform.enums.RoomStatus;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +28,11 @@ import com.sz.core.util.Utils;
 import com.sz.core.common.entity.PageResult;
 import com.sz.core.common.entity.SelectIdsDTO;
 import java.io.Serializable;
+import java.security.SecureRandom;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Consumer;
 
 import com.sz.admin.rooms.pojo.dto.RoomsCreateDTO;
@@ -48,6 +59,7 @@ import com.sz.admin.rooms.pojo.vo.RoomsVO;
 @RequiredArgsConstructor
 public class RoomsServiceImpl extends ServiceImpl<RoomsMapper, Rooms> implements RoomsService {
     private final HotelsService hotelsService;
+    private final HotelOwnersService ownersService;
     @Override
     public void create(RoomsCreateDTO dto){
         Rooms rooms = BeanCopyUtils.copy(dto, Rooms.class);
@@ -104,11 +116,11 @@ public class RoomsServiceImpl extends ServiceImpl<RoomsMapper, Rooms> implements
     @Override
     public PageResult<RoomsVO> page(RoomsListDTO dto){
         // todo 酒店owner可查-token取值
-        Long ownerId = 1L;
-        HotelOwners hotelOwners = QueryChain.of(HotelOwners.class).eq(HotelOwners::getOwnerId, ownerId).one();
-        CommonResponseEnum.INVALID_TOKEN.message("该酒店账号不存在").assertNull(hotelOwners);
-        // 只能查自身拥有的
-        dto.setHotelId(hotelOwners.getHotelId());
+//        Long ownerId = 1L;
+//        HotelOwners hotelOwners = QueryChain.of(HotelOwners.class).eq(HotelOwners::getOwnerId, ownerId).one();
+//        CommonResponseEnum.INVALID_TOKEN.message("该酒店账号不存在").assertNull(hotelOwners);
+//        // 只能查自身拥有的
+//        dto.setHotelId(hotelOwners.getHotelId());
 
         Page<RoomsVO> page = pageAs(PageUtils.getPage(dto), buildQueryWrapper(dto), RoomsVO.class);
         return PageUtils.getPageResult(page);
@@ -167,4 +179,34 @@ public class RoomsServiceImpl extends ServiceImpl<RoomsMapper, Rooms> implements
         }
         return wrapper;
     }
+    @Override
+    public void ontoData(){
+        List<Hotels> hotels = hotelsService.list();
+
+        List<HotelOwners> owners = new ArrayList<>();
+        Random random = new Random();
+        int randomNumber = 100 + random.nextInt(900);
+        for (Hotels hotel : hotels) {
+            String englishName = hotel.getEnglishName();
+            String passwordRaw = (englishName != null && englishName.length() >= 4)
+                    ? englishName.substring(0, 4) + "123"
+                    : "admin123";
+
+            String encodedPwd = BCrypt.hashpw(passwordRaw, BCrypt.gensalt(10));
+
+            HotelOwners owner = new HotelOwners();
+            owner.setOwnerId("BOT"+randomNumber++);
+            owner.setHotelId(hotel.getHotelId());
+            owner.setName((englishName != null ? englishName : "Admin") + "-前台");
+            owner.setEmail(null);  // 邮箱为空
+            owner.setPhone(null);  // 可生成随机手机号或设置为空
+            owner.setPasswordHash(encodedPwd);
+
+            owners.add(owner);
+        }
+
+        ownersService.saveBatch(owners);
+
+        System.out.println("✅ 共插入酒店后台账号数: " + owners.size());}
 }
+

@@ -20,7 +20,7 @@ public class RoomsImportDTO {
 
     @ExcelProperty(value = "关联的酒店ID")
     @Schema(description =  "关联的酒店ID")
-    private Long hotelId;
+    private String hotelId;
 
     @ExcelProperty(value = "房间号")
     @Schema(description =  "房间号")

@@ -46,7 +46,12 @@ public class PaymentController  {
         paymentService.finished(dto);
         return ApiResult.success();
     }
-
+    @Operation(summary = "支付订单")
+    @PutMapping("/paid")
+    public ApiResult paid(@RequestBody PaymentUpdateDTO dto) {
+        paymentService.paid(dto);
+        return ApiResult.success();
+    }
     @Operation(summary = "取消订单")
     @PutMapping("/cancel")
     public ApiResult cancel(@RequestBody PaymentUpdateDTO dto) {
@@ -68,10 +73,14 @@ public class PaymentController  {
     }
 
     @Operation(summary = "详情")
-    @SaCheckPermission(value = "payment.query_table")
     @GetMapping("/{id}")
     public ApiResult<PaymentVO> detail(@PathVariable Object id) {
         return ApiResult.success(paymentService.detail(id));
+    }
+    @Operation(summary = "根据酒店id查询")
+    @GetMapping("/byBooking/{id}")
+    public ApiResult<PaymentVO> detailByBooking(@PathVariable Object id) {
+        return ApiResult.success(paymentService.detailByBookingId(id));
     }
 
 

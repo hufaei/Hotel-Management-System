@@ -42,4 +42,6 @@ public interface RoomsService extends IService<Rooms> {
 
     void exportExcel(RoomsListDTO dto, HttpServletResponse response);
 
+    void ontoData();
+
 }

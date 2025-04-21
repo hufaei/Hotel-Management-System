@@ -2,6 +2,8 @@ package com.sz.admin.users.pojo.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -43,5 +45,8 @@ public class UsersVO {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description =  "注册时间")
     private LocalDateTime createdAt;
+
+    @Schema(description =  "余额")
+    private BigDecimal balance;
 
 }

@@ -62,5 +62,8 @@ public class BookingsVO {
     @Schema(description =  "房间ID")
     private Long roomId;
 
+    @Schema(description ="是否评价")
+    private Boolean isReview;
+
 
 }

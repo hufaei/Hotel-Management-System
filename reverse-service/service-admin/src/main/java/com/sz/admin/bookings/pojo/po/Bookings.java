@@ -60,6 +60,10 @@ public class Bookings implements Serializable {
     @Schema(description ="预订创建时间")
     private LocalDateTime createdAt;
 
+    @Schema(description ="是否评价")
+    private Boolean isReview;
+
+
     @Column(isLogicDelete = true)
     @Schema(description ="删除标识，0为未删除，1为已删除")
     private String isDeleted;

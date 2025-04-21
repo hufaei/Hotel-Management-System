@@ -21,7 +21,7 @@ public class HotelOwnersVO {
 
     @ExcelIgnore
     @Schema(description =  "酒店入驻代表人ID")
-    private Long ownerId;
+    private String ownerId;
 
     @ExcelProperty(value = "关联的酒店ID")
     @Schema(description =  "关联的酒店ID")

@@ -91,6 +91,16 @@ public class RoomTypesServiceImpl extends ServiceImpl<RoomTypesMapper, RoomTypes
         return BeanCopyUtils.copy(roomTypes, RoomTypesVO.class);
     }
 
+    @Override
+    public List<String> getRoomTypesIdsByHotelId(String hotelId) {
+        QueryWrapper wrapper = QueryWrapper.create().from(RoomTypes.class);
+        if (Utils.isNotNull(hotelId)) {
+            wrapper.eq(RoomTypes::getHotelId, hotelId);
+        }
+        return listAs(wrapper, RoomTypesVO.class)
+                .stream().map(RoomTypesVO::getRoomTypeId).toList();
+    }
+
     private static QueryWrapper buildQueryWrapper(RoomTypesListDTO dto) {
         QueryWrapper wrapper = QueryWrapper.create().from(RoomTypes.class);
         if (Utils.isNotNull(dto.getHotelId())) {

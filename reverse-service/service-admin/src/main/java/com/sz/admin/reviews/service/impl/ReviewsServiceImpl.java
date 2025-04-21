@@ -41,6 +41,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import com.sz.excel.utils.ExcelUtils;
 import lombok.SneakyThrows;
 import com.sz.admin.reviews.pojo.vo.ReviewsVO;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
@@ -59,9 +60,11 @@ public class ReviewsServiceImpl extends ServiceImpl<ReviewsMapper, Reviews> impl
     private final BookingsService bookingsService;
 
     @Override
+    @Transactional
     public void create(ReviewsCreateDTO dto){
         Reviews reviews = BeanCopyUtils.copy(dto, Reviews.class);
-        Long userId = 1L;
+        Long userId = dto.getUserId();
+        // todo stpUtil校验
         Long bookingId = reviews.getBookingId();
         Double rate = reviews.getRating();
         Double hRate = reviews.getHealthRate();
@@ -72,6 +75,7 @@ public class ReviewsServiceImpl extends ServiceImpl<ReviewsMapper, Reviews> impl
         // 校验
         Users users = usersService.getById(userId);
         Bookings bookings = bookingsService.getById(bookingId);
+        CommonResponseEnum.EXISTS.message("该订单已评论").assertTrue(bookings.getIsReview());
         QueryWrapper wrapper = QueryWrapper.create().eq(Reviews::getBookingId, dto.getBookingId());
         CommonResponseEnum.NOT_EXISTS.message("不存在的用户").assertNull(users);
         CommonResponseEnum.NOT_EXISTS.message("不存在的订单").assertNull(bookings);
@@ -84,6 +88,8 @@ public class ReviewsServiceImpl extends ServiceImpl<ReviewsMapper, Reviews> impl
         CommonResponseEnum.EXISTS.message("该订单已评论").assertTrue(count(wrapper)>0);
         // todo sa-token中填充用户id
         reviews.setUserId(userId);
+        bookings.setIsReview(Boolean.TRUE);
+        bookingsService.updateById(bookings);
         save(reviews);
     }
 

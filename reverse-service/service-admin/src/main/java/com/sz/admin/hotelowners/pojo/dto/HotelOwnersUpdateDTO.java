@@ -18,7 +18,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class HotelOwnersUpdateDTO {
 
     @Schema(description =  "酒店入驻代表人ID")
-    private Long ownerId;
+    private String ownerId;
 
     @Schema(description =  "关联的酒店ID")
     private String hotelId;

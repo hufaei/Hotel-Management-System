@@ -9,6 +9,7 @@ import com.sz.admin.payment.pojo.dto.PaymentCreateDTO;
 import com.sz.admin.payment.pojo.dto.PaymentUpdateDTO;
 import com.sz.admin.payment.pojo.dto.PaymentListDTO;
 import com.sz.admin.payment.pojo.vo.PaymentVO;
+//import org.dromara.hmily.annotation.HmilyTCC;
 
 /**
  * <p>
@@ -34,6 +35,8 @@ public interface PaymentService extends IService<Payment> {
 
     PaymentVO detail(Object id);
 
+//    @HmilyTCC(confirmMethod = "confirmPaid", cancelMethod = "cancelPaid")
+    void paid(PaymentUpdateDTO dto);
 
-
+    PaymentVO detailByBookingId(Object id);
 }

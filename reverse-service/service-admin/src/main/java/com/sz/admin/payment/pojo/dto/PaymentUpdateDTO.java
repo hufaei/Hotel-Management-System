@@ -18,7 +18,7 @@ public class PaymentUpdateDTO {
     @Schema(description =  "支付单ID")
     private Long paymentId;
 
-    @Schema(description =  "支付取消或退款原因")
+    @Schema(description =  "支付退款原因")
     private String reason;
 
 }

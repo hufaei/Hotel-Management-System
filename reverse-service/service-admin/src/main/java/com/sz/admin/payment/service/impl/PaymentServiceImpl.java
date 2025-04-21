@@ -1,6 +1,8 @@
 package com.sz.admin.payment.service.impl;
 
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+import com.sz.admin.bookings.pojo.po.Bookings;
+import com.sz.admin.users.service.UsersService;
 import com.sz.core.common.event.EventPublisher;
 import com.sz.platform.enums.PaymentStatus;
 import com.sz.platform.event.PaymentCancelledEvent;
@@ -19,6 +21,7 @@ import com.sz.core.util.Utils;
 import com.sz.core.common.entity.PageResult;
 import com.sz.core.common.entity.SelectIdsDTO;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 import com.sz.admin.payment.pojo.dto.PaymentCreateDTO;
 import com.sz.admin.payment.pojo.dto.PaymentUpdateDTO;
@@ -38,6 +41,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, Payment> implements PaymentService {
     private final EventPublisher eventPublisher;
+    private UsersService usersService;
+
     @Override
     public void create(PaymentCreateDTO dto){
         Payment payment = BeanCopyUtils.copy(dto, Payment.class);
@@ -114,6 +119,75 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, Payment> impl
         return BeanCopyUtils.copy(payment, PaymentVO.class);
     }
 
+    /**
+     * Try 阶段：校验支付单有效性 + 冻结余额 + 标记预扣
+     */
+    @Override
+    @Transactional
+    public void paid(PaymentUpdateDTO dto) {
+        // id有效性校验
+        QueryWrapper wrapper = QueryWrapper.create()
+                .eq(Payment::getPaymentId, dto.getPaymentId());
+        CommonResponseEnum.INVALID_ID.message("支付单不存在").assertTrue(count(wrapper) <= 0);
+        Payment payment = getOne(wrapper);
+        CommonResponseEnum.INVALID.message("不允许的操作")
+                .assertFalse(payment.getPaymentStatus().equals(PaymentStatus.UNPAID));
+        payment.setPaymentStatus(PaymentStatus.PAID);
+        usersService.freeze(BigDecimal.valueOf(payment.getAmount()));
+        // 3. 更新支付单状态为 PREPAID（预支付）
+        payment.setPaymentStatus(PaymentStatus.PREPAID);
+        saveOrUpdate(payment);
+    }
+
+//    /**
+//     * Confirm 阶段：实际扣款 + 标记已支付
+//     */
+//    @Transactional
+//    public void confirmPaid(PaymentUpdateDTO dto) {
+//        // 幂等校验：若已扣款则跳过
+//        QueryWrapper wrapper = QueryWrapper.create()
+//                .eq(Payment::getPaymentId, dto.getPaymentId());
+//        CommonResponseEnum.INVALID_ID.message("支付单不存在").assertTrue(count(wrapper) <= 0);
+//        Payment payment = getOne(wrapper);
+//        if(payment.getPaymentStatus().equals(PaymentStatus.PAID)){
+//            return;
+//        }
+//        // 1. 从冻结中扣除余额
+//        usersService.unfreeze(BigDecimal.valueOf(payment.getAmount()),Boolean.TRUE);
+//
+//        // 2. 更新支付单状态为 PAID
+//        payment.setPaymentStatus(PaymentStatus.PAID);
+//        saveOrUpdate(payment);
+//    }
+//
+//    /**
+//     * Cancel 阶段：解冻余额 + 回滚支付单状态
+//     */
+//    @Transactional
+//    public void cancelPaid(PaymentUpdateDTO dto) {
+//        // 幂等校验：若已扣款则跳过
+//        QueryWrapper wrapper = QueryWrapper.create()
+//                .eq(Payment::getPaymentId, dto.getPaymentId());
+//        Payment payment = getOne(wrapper);
+//        if(payment.getPaymentStatus().equals(PaymentStatus.FINISHED)){
+//            return;
+//        }
+//        // 1. 解冻预扣余额
+//        usersService.unfreeze(BigDecimal.valueOf(payment.getAmount()),Boolean.FALSE);
+//
+//        // 2. 回滚支付单状态为 UNPAID
+//        payment.setPaymentStatus(PaymentStatus.UNPAID);
+//       saveOrUpdate(payment);
+//    }
+
+    @Override
+    public PaymentVO detailByBookingId(Object id) {
+        QueryWrapper wrapper = QueryWrapper.create()
+                .eq(Payment::getBookingId, id);
+        Payment payment = getOne(wrapper);
+        return BeanCopyUtils.copy(payment, PaymentVO.class);
+    }
+
     private static QueryWrapper buildQueryWrapper(PaymentListDTO dto) {
         QueryWrapper wrapper = QueryWrapper.create().from(Payment.class);
         if (Utils.isNotNull(dto.getPaymentId())) {
@@ -128,6 +202,7 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, Payment> impl
         if (Utils.isNotNull(dto.getCreatedAtStart()) && Utils.isNotNull(dto.getCreatedAtEnd())) {
             wrapper.between(Payment::getCreatedAt, dto.getCreatedAtStart(), dto.getCreatedAtEnd());
         }
+        wrapper.orderBy(Payment::getCreatedAt,false);
         return wrapper;
     }
 }

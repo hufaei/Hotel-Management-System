@@ -29,7 +29,4 @@ public class RoomsListDTO extends PageQuery {
     @Schema(description ="房间状态")
     private RoomStatus roomStatus;
 
-//    @Schema(description =  "当前房间库存数量")
-//    private Integer availability;
-
 }

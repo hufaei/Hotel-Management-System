@@ -42,7 +42,7 @@ public class PasswordStrategy implements IAuthStrategy {
         // 复制用户信息
 //        LoginUser loginUser = sysUserService.buildLoginUser(username, password);
         LoginUser loginUser1 = usersService.buildLoginUser(username,password);
-        Long userId = loginUser1.getUserInfo().getUserId();
+        String userId = loginUser1.getUserInfo().getUserId();
         // 设置jwt额外数据
         Map<String, Object> extraData = createExtraData(clientId, userId);
         // 执行登录
@@ -59,7 +59,7 @@ public class PasswordStrategy implements IAuthStrategy {
         return model;
     }
 
-    private Map<String, Object> createExtraData(String clientId, Long userId) {
+    private Map<String, Object> createExtraData(String clientId, String userId) {
         Map<String, Object> extraData = new HashMap<>();
         extraData.put("clientId", clientId);
         extraData.put("userId", userId);

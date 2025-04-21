@@ -7,7 +7,9 @@ import com.mybatisflex.annotation.EnumValue;
 public enum PaymentStatus {
     UNPAID(0, "未支付"),
     CANCEL(1, "已取消"),
-    FINISHED(2,"已结束");
+    FINISHED(2,"已结束"),
+    PAID(3,"已支付"),
+    PREPAID(4,"预支付");
 
     private final int code;       // 状态码
     private final String desc;    // 描述信息

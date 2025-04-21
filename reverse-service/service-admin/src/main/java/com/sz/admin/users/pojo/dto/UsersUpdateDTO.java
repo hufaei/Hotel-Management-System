@@ -2,6 +2,8 @@ package com.sz.admin.users.pojo.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -28,5 +30,8 @@ public class UsersUpdateDTO {
 
     @Schema(description =  "用户手机号码")
     private String phone;
+
+    @Schema(description =  "余额")
+    private BigDecimal balance;
 
 }

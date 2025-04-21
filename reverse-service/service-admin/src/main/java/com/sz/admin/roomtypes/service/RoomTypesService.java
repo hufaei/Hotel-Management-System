@@ -32,6 +32,8 @@ public interface RoomTypesService extends IService<RoomTypes> {
 
     RoomTypesVO detail(Object id);
 
+    List<String> getRoomTypesIdsByHotelId(String hotelId);
+
 
 
 }

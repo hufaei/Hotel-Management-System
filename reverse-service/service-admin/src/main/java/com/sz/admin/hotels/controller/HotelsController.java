@@ -4,10 +4,15 @@ import cn.dev33.satoken.stp.StpUtil;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.sz.admin.hotels.mapper.HotelsMapper;
 import com.sz.admin.hotels.pojo.HotelDocument;
+import com.sz.admin.hotels.pojo.HotelEsSearch;
 import com.sz.admin.hotels.pojo.po.Hotels;
 //import com.sz.admin.hotels.service.HotelIndexService;
 import com.sz.admin.hotels.service.HotelIndexService;
 import com.sz.admin.hotels.service.RecommendService;
+import com.sz.admin.roomtypeinventory.mapper.RoomTypeInventoryMapper;
+import com.sz.admin.roomtypeinventory.pojo.po.RoomTypeInventory;
+import com.sz.admin.roomtypeinventory.pojo.vo.RoomTypeInventoryVO;
+import com.sz.admin.roomtypes.mapper.RoomTypesMapper;
 import com.sz.admin.roomtypes.service.RoomTypesService;
 import com.sz.core.common.enums.CommonResponseEnum;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,6 +38,7 @@ import com.sz.admin.hotels.pojo.dto.HotelsUpdateDTO;
 import com.sz.admin.hotels.pojo.dto.HotelsListDTO;
 import com.sz.admin.hotels.pojo.vo.HotelsVO;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -53,9 +59,9 @@ public class HotelsController  {
 
     private final HotelsService hotelsService;
     private final RedisTemplate redisTemplate;
-    private final HotelIndexService hotelIndexService;
-    private final RecommendService recommendService;
+    private final RoomTypeInventoryMapper inventoryMapper;
     private final RoomTypesService roomTypesService;
+    private final RecommendService recommendService;
     private final ElasticsearchOperations elasticsearchOperations;
 
     @Operation(summary = "新增")
@@ -101,9 +107,9 @@ public class HotelsController  {
                     .range("recommend:model:" + 1 + ":hotels", 0, -1);
             return ApiPageResult.success(recommendHotels);
         }
-        Long userId = (Long) StpUtil.getLoginId();
+        Long userId = StpUtil.getLoginIdAsLong();
 //        log.info("user get recommend, id: {}", userId);
-//        recommendService.asyncCalculateRecommend(userId);
+        recommendService.asyncCalculateRecommend(userId);
         // 1.检查是否已有推荐结果
         Integer modelId = (Integer) redisTemplate.opsForValue().get("recommend:user:" + userId);
         if (modelId == null) {
@@ -116,6 +122,18 @@ public class HotelsController  {
         // 2.从对应模型获取推荐列表
         return ApiPageResult.success(recommendHotels);
     }
+    @Operation(summary = "获取推荐")
+    @PostMapping("/recommend")
+    public ApiResult recommend() {
+        boolean isLogin = StpUtil.isLogin();
+        CommonResponseEnum.NOLOGIN.assertFalse(isLogin);
+
+        Long userId = StpUtil.getLoginIdAsLong();
+        log.info("user get recommend, id: {}", userId);
+        recommendService.asyncCalculateRecommend(userId);
+
+        return ApiPageResult.success();
+    }
     @Operation(summary = "酒店收藏")
     @GetMapping("/collect/{hotelId}")
     public ApiResult collectHotel(@PathVariable String hotelId) {
@@ -123,7 +141,7 @@ public class HotelsController  {
         if (!StpUtil.isLogin()) {
             return ApiResult.error(CommonResponseEnum.NOLOGIN);
         }
-        Long userId = (Long) StpUtil.getLoginId();
+        Long userId = StpUtil.getLoginIdAsLong();
         redisTemplate.opsForSet().add("collection:" + userId, hotelId);
         return ApiResult.success("收藏成功");
     }
@@ -134,26 +152,26 @@ public class HotelsController  {
         if (!StpUtil.isLogin()) {
             return ApiResult.error(CommonResponseEnum.NOLOGIN);
         }
-        Long userId = (Long) StpUtil.getLoginId();
+        Long userId = StpUtil.getLoginIdAsLong();
         redisTemplate.opsForSet().remove("collection:" + userId, hotelId);
         return ApiResult.success("收藏成功");
     }
 
     @Operation(summary = "酒店收藏列表")
     @GetMapping("/collection")
-    public List<HotelsVO> collectList() {
+    public ApiResult<List<HotelsVO>> collectList() {
         // 检查是否登录
         CommonResponseEnum.NOLOGIN.assertTrue(!StpUtil.isLogin());
-        Long userId = (Long) StpUtil.getLoginId();
+        Long userId = StpUtil.getLoginIdAsLong();
         // 从 redis 中获取用户收藏的酒店 ID 集合
         Set<String> hotelIds = redisTemplate.opsForSet().members("collection:" + userId);
         if (hotelIds == null || hotelIds.isEmpty()) {
-            return Collections.emptyList();
+            return ApiResult.success(Collections.emptyList());
         }
         // 使用 MybatisFlex 的 in 查询来获取收藏的酒店列表
         QueryWrapper wrapper = new QueryWrapper().from(Hotels.class);
         wrapper.in("hotel_id", hotelIds);
-        return hotelsService.objListAs(wrapper,HotelsVO.class);
+        return ApiResult.success(hotelsService.listAs(wrapper,HotelsVO.class));
     }
 
 
@@ -171,10 +189,10 @@ public class HotelsController  {
      * 返回匹配到的酒店 id 列表
      */
     @PostMapping("/search")
-    public List<String> searchHotels(@RequestBody List<String> keywords) {
+    public List<String> searchHotels(@RequestBody HotelEsSearch esSearch) {
         // 构建布尔查询
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        for (String keyword : keywords) {
+        for (String keyword : esSearch.getKeywords()) {
             boolQuery.must(QueryBuilders.matchQuery("content", keyword));
         }
 
@@ -182,13 +200,41 @@ public class HotelsController  {
         NativeSearchQuery query = new NativeSearchQueryBuilder()
                 .withQuery(boolQuery)
                 .build();
-
-        // 执行搜索
-        SearchHits<HotelDocument> searchHits = elasticsearchOperations.search(query, HotelDocument.class);
-
-        // 提取并返回结果
-        return searchHits.getSearchHits().stream()
+        List<String> matchedHotelIds = elasticsearchOperations
+                .search(query, HotelDocument.class)
+                .getSearchHits().stream()
                 .map(hit -> hit.getContent().getId())
-                .collect(Collectors.toList());
+                .toList();
+        // 2) date list
+        LocalDate start = esSearch.getDateStart();
+        LocalDate end   = esSearch.getDateEnd();
+        List<String> availableHotels = new ArrayList<>();
+        if(start!= null && end != null){
+            List<LocalDate> stayDates = start.datesUntil(end.plusDays(1)).toList();
+
+
+            // 3) for each hotel, check inventory
+            for (String hotelId : matchedHotelIds) {
+                // get all room‐types of this hotel
+                List<String> roomTypeIds = roomTypesService.getRoomTypesIdsByHotelId(hotelId);
+
+                boolean anyFullStayAvailable = roomTypeIds.stream().anyMatch(rtId -> {
+                    QueryWrapper wrapper = QueryWrapper.create().from(RoomTypeInventory.class);
+                    wrapper.eq(RoomTypeInventory::getRoomTypeId, rtId);
+                    wrapper.between(RoomTypeInventory::getDate, start, end)
+                            .gt(RoomTypeInventory::getAvailableQuantity, 0);
+                    long count = inventoryMapper.selectCountByQuery(wrapper);
+                    return count == stayDates.size();
+                });
+                if (anyFullStayAvailable) {
+                    availableHotels.add(hotelId);
+                }
+            }
+            return availableHotels;
+        }
+        return matchedHotelIds;
+
     }
+
+
 }

@@ -7,6 +7,9 @@ import com.mybatisflex.core.query.QueryChain;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.sz.admin.admins.pojo.po.Admins;
 import com.sz.admin.admins.pojo.vo.AdminsVO;
+import com.sz.admin.hotelowners.pojo.po.HotelOwners;
+import com.sz.admin.hotelowners.pojo.vo.HotelOwnersVO;
+import com.sz.admin.hotelowners.service.HotelOwnersService;
 import com.sz.core.common.entity.*;
 import com.sz.core.util.*;
 import com.sz.redis.CommonKeyConstants;
@@ -25,10 +28,8 @@ import com.mybatisflex.core.query.QueryWrapper;
 import com.sz.core.common.enums.CommonResponseEnum;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.function.Consumer;
 
 import com.sz.admin.users.pojo.dto.UsersCreateDTO;
@@ -75,9 +76,11 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
     @Override
     public void update(UsersUpdateDTO dto){
-        // todo userId从sa-token中获取主键填入
+        CommonResponseEnum.NOLOGIN.assertFalse(StpUtil.isLogin());
+        Long useId = StpUtil.getLoginIdAsLong();
 
         Users users = BeanCopyUtils.copy(dto, Users.class);
+        users.setUserId(useId);
         QueryWrapper wrapper;
 
         // id有效性校验
@@ -106,15 +109,37 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
     }
 
     @Override
+    public void freeze(BigDecimal count) {
+        CommonResponseEnum.NOLOGIN.assertFalse(StpUtil.isLogin());
+
+        Long userId = StpUtil.getLoginIdAsLong();
+        Users user = getById(userId);
+        user.setFreeze(count);
+        user.setBalance(user.getBalance().subtract(count));
+        saveOrUpdate(user);
+    }
+    @Override
+    public void unfreeze(BigDecimal amount,Boolean bool) {
+        CommonResponseEnum.NOLOGIN.assertFalse(StpUtil.isLogin());
+
+        Long userId = StpUtil.getLoginIdAsLong();
+        Users user = getById(userId);
+        user.setFreeze(user.getFreeze().subtract(amount));
+        if(bool){
+            user.setFreeze(user.getFreeze().subtract(amount));
+        }else{
+            user.setBalance(user.getBalance().add(amount));
+        }
+        saveOrUpdate(user);
+    }
+
+    @Override
     // 登录使用手机号或者邮箱
     public UsersVO detailByPhoneOremail(String phoneOrEmail) {
         QueryWrapper queryWrapper = QueryWrapper.create()
                 .eq(Users::getPhone,phoneOrEmail)
                 .or((Consumer<QueryWrapper>) qw -> qw.eq(Users::getEmail,phoneOrEmail));
 
-        // 检查是否存在多条记录
-        Long count = count(queryWrapper);
-        CommonResponseEnum.INVALID.assertTrue(count != 1);
         // 查询单条记录
         Users user = getOne(queryWrapper);
         return BeanCopyUtils.copy(user, UsersVO.class);
@@ -134,25 +159,35 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         if (Utils.isNotNull(dto.getPhone())) {
             wrapper.eq(Users::getPhone, dto.getPhone());
         }
-//        if (Utils.isNotNull(dto.getPasswordHash())) {
-//            wrapper.eq(Users::getPasswordHash, dto.getPasswordHash());
-//        }
         if (Utils.isNotNull(dto.getCreatedAtStart()) && Utils.isNotNull(dto.getCreatedAtEnd())) {
             wrapper.between(Users::getCreatedAt, dto.getCreatedAtStart(), dto.getCreatedAtEnd());
         }
         return wrapper;
     }
+    private final HotelOwnersService ownersService;
     @Override
     public LoginUser buildLoginUser(String username, String password) {
 
-        // todo 布隆校验——防止爆破登录
+        // 布隆校验——防止爆破登录
         boolean hasKey = RedisUtils.hasKey(CommonKeyConstants.SYS_PWD_ERR_CNT, username);
         Object value = RedisUtils.getValue(CommonKeyConstants.SYS_PWD_ERR_CNT, username);
         long count = hasKey ? Long.parseLong(String.valueOf(value)) : 0;
 
         String maxErrCnt = SysConfigUtils.getConfValue("sys.pwd.errCnt");
         CommonResponseEnum.CNT_PASSWORD_ERR.assertTrue(hasKey && (count >= Utils.getIntVal(maxErrCnt)));
-
+        if(username.startsWith("BOT")){
+            HotelOwnersVO ownersVO = ownersService.detail(username);
+            BaseUserInfo userInfo = new BaseUserInfo();
+            userInfo.setUserId(ownersVO.getOwnerId());
+            userInfo.setOwnerHotelId(ownersVO.getHotelId());
+            userInfo.setUsername(ownersVO.getName());
+            LoginUser loginUser = new LoginUser();
+            loginUser.setUserInfo(userInfo);
+            List<String> rolesList = List.of("BOT");
+            Set<String> rolesSet = new HashSet<>(rolesList);
+            loginUser.setRoles(rolesSet);
+            return loginUser;
+        }
         // 密码校验
         UsersVO userVo = detailByPhoneOremail(username);
         Long userId = userVo.getUserId();
@@ -173,9 +208,16 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         return BeanCopyUtils.copy(users, UsersVO.class);
     }
 
+
+
     @NotNull
     private LoginUser getLoginUser(Long userId, UsersVO userVo) {
-        BaseUserInfo userInfo = BeanCopyUtils.springCopy(userVo, BaseUserInfo.class);
+        BaseUserInfo userInfo = new BaseUserInfo();
+        userInfo.setUserId(String.valueOf(userId));
+        userInfo.setUsername(userVo.getUsername());
+        userInfo.setEmail(userVo.getEmail());
+        userInfo.setPhone(userVo.getPhone());
+        userInfo.setBalance(userVo.getBalance());
         Users user = QueryChain.of(Users.class).eq(Users::getUserId, userId).one();
         CommonResponseEnum.INVALID_USER.assertNull(user);
         LoginUser loginUser = new LoginUser();
@@ -186,7 +228,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
     @Override
     public void resetPassword(PasswordResetVo resetVo) {
-        Long loginId = (Long) StpUtil.getLoginId();
+        Long loginId = StpUtil.getLoginIdAsLong();
         QueryWrapper wrapper = QueryWrapper.create().from(Users.class);
         wrapper.eq(Users::getUsername, resetVo.getUsername());
         Users user = getOne(wrapper);

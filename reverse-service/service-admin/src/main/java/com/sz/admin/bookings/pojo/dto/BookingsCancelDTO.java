@@ -17,4 +17,7 @@ public class BookingsCancelDTO {
 
     @Schema(description =  "预订ID")
     private Long bookingId;
+
+    @Schema
+    private String reason;
 }

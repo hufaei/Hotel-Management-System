@@ -21,6 +21,9 @@ public class BookingsUpdateDTO {
     @Schema(description ="关联的房间ID")
     private Long roomId;
 
+    @Schema(description ="是否评价")
+    private Boolean isReview;
+
 
 
 }

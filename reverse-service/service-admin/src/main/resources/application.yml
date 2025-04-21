@@ -79,6 +79,15 @@ sz:
     mini:
       app-id: your_app_id
       app-secret: your_app_secret
+
+hmily:
+  repository:
+    support: mysql     # 日志存储类型：mysql/oracle/mongo…
+  tcc:
+    confirm-retry-time: 3
+    cancel-retry-time: 3
+    async: true        # CONFIRM/CANCEL 异步执行
+
 botsuch-rpc:
   name: BotSuch
   serverHost: localhost

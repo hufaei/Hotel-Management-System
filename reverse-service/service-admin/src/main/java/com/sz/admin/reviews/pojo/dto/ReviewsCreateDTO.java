@@ -19,7 +19,8 @@ public class ReviewsCreateDTO {
 
    @Schema(description =  "关联的预订ID")
    private Long bookingId;
-
+   @Schema(description =  "关联的预订ID")
+   private Long userId;
    @Schema(description ="总评分")
    private Double rating;
 

@@ -4,6 +4,7 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.sz.admin.bookings.pojo.dto.BookingsCancelDTO;
 import com.sz.admin.hotelowners.pojo.po.HotelOwners;
 import com.sz.admin.payment.pojo.dto.PaymentCreateDTO;
+import com.sz.admin.payment.pojo.dto.PaymentUpdateDTO;
 import com.sz.admin.payment.pojo.po.Payment;
 import com.sz.admin.payment.service.PaymentService;
 import com.sz.admin.rooms.pojo.dto.RoomsCreateDTO;
@@ -184,11 +185,14 @@ public class BookingsServiceImpl extends ServiceImpl<BookingsMapper, Bookings> i
                           .assertFalse(BookingStatus.PENDING_CONFIRMATION.equals(bookings.getStatus()));
 
         // 支付单未支付 || 已经支付 todo 支付了执行退款。
-//        Payment payment = paymentService.getOne(QueryChain.of(Payment.class).eq(Payment::getBookingId,bookings.getBookingId()));
+        Payment payment = paymentService.getOne(QueryChain.of(Payment.class).eq(Payment::getBookingId,bookings.getBookingId()));
 //        CommonResponseEnum.VALID_ERROR.message("已支付不能取消")
 //                .assertTrue(PaymentStatus.FINISHED.equals(payment.getPaymentStatus()));
-//        PaymentUpdateDTO pdto = BeanCopyUtils.copy(payment,PaymentUpdateDTO.class);
-//        paymentService.finished(pdto);
+
+        PaymentUpdateDTO pdto = new PaymentUpdateDTO();
+        pdto.setPaymentId(payment.getPaymentId());
+        pdto.setReason(dto.getReason());
+        paymentService.finished(pdto);
 //
 //        // todo 鉴权校验-酒店管理者id从token中获取
 //        Long ownerId = 1L;
@@ -242,6 +246,7 @@ public class BookingsServiceImpl extends ServiceImpl<BookingsMapper, Bookings> i
         if (Utils.isNotNull(dto.getStatus())) {
             wrapper.eq(Bookings::getStatus, dto.getStatus());
         }
+        wrapper.orderBy(Bookings::getCreatedAt,false);
         return wrapper;
     }
 

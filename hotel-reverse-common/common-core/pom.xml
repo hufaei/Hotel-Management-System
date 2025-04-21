@@ -12,6 +12,12 @@
     <artifactId>common-core</artifactId>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.dromara/hmily-tcc -->
+<!--        <dependency>-->
+<!--            <groupId>org.dromara</groupId>-->
+<!--            <artifactId>hmily-tcc</artifactId>-->
+<!--            <version>2.1.2</version>-->
+<!--        </dependency>-->
         <!-- springboot web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

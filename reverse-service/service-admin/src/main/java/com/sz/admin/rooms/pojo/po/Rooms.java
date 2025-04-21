@@ -30,7 +30,7 @@ public class Rooms implements Serializable {
     private Long roomId;
 
     @Schema(description ="关联的酒店ID")
-    private Long hotelId;
+    private String hotelId;
 
     @Schema(description ="房间号")
     private String roomNumber;
