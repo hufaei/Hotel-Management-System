@@ -25,17 +25,11 @@ public class GlobalConstant {
      */
     public static final String CHANGE_PERMISSIONS_SIGNAL = "change_permissions_signal";
     /**
-     * todo rabbitMq的交换机名称--多个
+     * rabbitMq的延时队列基本信息
      */
-    public static final String EXCHANGE_NAME = "sz-exchange";
-    /**
-     * rabbitMq的队列名称--多
-     */
-    public static final String QUEUE_NAME = "sz-queue";
-    /**
-     * rabbitMq的routingKey--多
-     */
-    public static final String ROUTING_KEY = "sz-routingKey";
+    public static final String DELAY_EXCHANGE_NAME = "order.delay.exchange";
+    public static final String DELAY_QUEUE_NAME = "order.delay.queue";
+    public static final String DELAY_ROUTING_KEY = "order.delay.routingkey";
     /**
      * 超级管理员角色标识
      */

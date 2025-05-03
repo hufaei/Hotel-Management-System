@@ -2,12 +2,8 @@ package com.sz.admin.users.service.impl;
 
 import cn.dev33.satoken.secure.BCrypt;
 import cn.dev33.satoken.stp.StpUtil;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.mybatisflex.core.query.QueryChain;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
-import com.sz.admin.admins.pojo.po.Admins;
-import com.sz.admin.admins.pojo.vo.AdminsVO;
-import com.sz.admin.hotelowners.pojo.po.HotelOwners;
 import com.sz.admin.hotelowners.pojo.vo.HotelOwnersVO;
 import com.sz.admin.hotelowners.service.HotelOwnersService;
 import com.sz.core.common.entity.*;
@@ -115,6 +111,14 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         Long userId = StpUtil.getLoginIdAsLong();
         Users user = getById(userId);
         user.setFreeze(count);
+        user.setBalance(user.getBalance().subtract(count));
+        saveOrUpdate(user);
+    }
+    @Override
+    public void paid(BigDecimal count) {
+        CommonResponseEnum.NOLOGIN.assertFalse(StpUtil.isLogin());
+        Long userId = StpUtil.getLoginIdAsLong();
+        Users user = getById(userId);
         user.setBalance(user.getBalance().subtract(count));
         saveOrUpdate(user);
     }

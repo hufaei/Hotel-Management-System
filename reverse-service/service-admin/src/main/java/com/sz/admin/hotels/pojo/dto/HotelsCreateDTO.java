@@ -66,4 +66,6 @@ public class HotelsCreateDTO {
    @Schema(description ="房型列表")
    private String roomTypeList;
 
+   @Schema(description = "外显评分")
+   private Double rate;
 }

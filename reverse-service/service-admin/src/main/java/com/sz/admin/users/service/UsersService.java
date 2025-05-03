@@ -44,5 +44,7 @@ public interface UsersService extends IService<Users> {
 
     UsersVO detail(Object id);
 
-    void unfreeze(BigDecimal amount ,Boolean bool);
+    void paid(BigDecimal count);
+
+    void unfreeze(BigDecimal amount , Boolean bool);
 }

@@ -1,5 +1,6 @@
 package com.sz.admin.reviews.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.sz.admin.bookings.pojo.dto.BookingsListDTO;
 import com.sz.admin.bookings.pojo.po.Bookings;
@@ -65,6 +66,9 @@ public class ReviewsServiceImpl extends ServiceImpl<ReviewsMapper, Reviews> impl
         Reviews reviews = BeanCopyUtils.copy(dto, Reviews.class);
         Long userId = dto.getUserId();
         // todo stpUtil校验
+        CommonResponseEnum.NOLOGIN.message("未登录").assertFalse(StpUtil.isLogin());
+        CommonResponseEnum.NOLOGIN.message("登录状态异常").assertFalse(userId.equals(StpUtil.getLoginIdAsLong()));
+
         Long bookingId = reviews.getBookingId();
         Double rate = reviews.getRating();
         Double hRate = reviews.getHealthRate();
@@ -86,7 +90,6 @@ public class ReviewsServiceImpl extends ServiceImpl<ReviewsMapper, Reviews> impl
         CommonResponseEnum.NOT_EXISTS.message("不存在的评分范围").assertFalse(fRate>=0.0d && fRate<=5.0d);
 
         CommonResponseEnum.EXISTS.message("该订单已评论").assertTrue(count(wrapper)>0);
-        // todo sa-token中填充用户id
         reviews.setUserId(userId);
         bookings.setIsReview(Boolean.TRUE);
         bookingsService.updateById(bookings);

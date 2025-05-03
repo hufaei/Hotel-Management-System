@@ -1,12 +1,16 @@
 package com.sz.admin.payment.service.impl;
 
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+import com.sz.admin.bookings.mapper.BookingsMapper;
 import com.sz.admin.bookings.pojo.po.Bookings;
+import com.sz.admin.bookings.service.BookingsService;
 import com.sz.admin.users.service.UsersService;
 import com.sz.core.common.event.EventPublisher;
+import com.sz.platform.enums.BookingStatus;
 import com.sz.platform.enums.PaymentStatus;
 import com.sz.platform.event.PaymentCancelledEvent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import com.sz.admin.payment.service.PaymentService;
 import com.sz.admin.payment.pojo.po.Payment;
@@ -39,9 +43,11 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, Payment> implements PaymentService {
     private final EventPublisher eventPublisher;
-    private UsersService usersService;
+    private final UsersService usersService;
+    private final BookingsMapper bookingsMapper;
 
     @Override
     public void create(PaymentCreateDTO dto){
@@ -56,6 +62,7 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, Payment> impl
     }
     @Override
     @Transactional
+    // 已支付了调用这个
     public Boolean cancel(PaymentUpdateDTO dto){
         // id有效性校验
         QueryWrapper wrapper = QueryWrapper.create()
@@ -63,8 +70,8 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, Payment> impl
         CommonResponseEnum.INVALID_ID.message("支付单不存在").assertTrue(count(wrapper) <= 0);
         Payment payment = getOne(wrapper);
         // 已经支付--退款+取消订单
-        if(payment.getPaymentStatus().equals(PaymentStatus.FINISHED)){
-            // 退款逻辑
+        if(payment.getPaymentStatus().equals(PaymentStatus.PAID)){
+            // todo 退款逻辑
         }
 
         // 改状态+改预订单状态
@@ -72,7 +79,7 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, Payment> impl
             return true;
         }
         payment.setPaymentStatus(PaymentStatus.CANCEL);
-        saveOrUpdate(payment);
+        updateById(payment);
         // 事件发布解耦
         eventPublisher.publish(new PaymentCancelledEvent(this, payment.getBookingId()));
 
@@ -133,9 +140,14 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, Payment> impl
         CommonResponseEnum.INVALID.message("不允许的操作")
                 .assertFalse(payment.getPaymentStatus().equals(PaymentStatus.UNPAID));
         payment.setPaymentStatus(PaymentStatus.PAID);
-        usersService.freeze(BigDecimal.valueOf(payment.getAmount()));
-        // 3. 更新支付单状态为 PREPAID（预支付）
-        payment.setPaymentStatus(PaymentStatus.PREPAID);
+        QueryWrapper bwrapper = QueryWrapper.create().from(Bookings.class);
+        bwrapper.eq(Bookings::getBookingId, payment.getBookingId());
+        Bookings bookings = bookingsMapper.selectOneByQuery(bwrapper);
+        bookings.setStatus(BookingStatus.CONFIRMED);
+//        usersService.freeze(BigDecimal.valueOf(payment.getAmount()));
+//        // 3. 更新支付单状态为 PREPAID（预支付）
+//        payment.setPaymentStatus(PaymentStatus.PREPAID);
+        usersService.paid(BigDecimal.valueOf(payment.getAmount()));
         saveOrUpdate(payment);
     }
 
@@ -181,11 +193,27 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, Payment> impl
 //    }
 
     @Override
+    @Transactional
     public PaymentVO detailByBookingId(Object id) {
         QueryWrapper wrapper = QueryWrapper.create()
                 .eq(Payment::getBookingId, id);
         Payment payment = getOne(wrapper);
+        CommonResponseEnum.INVALID_ID.assertNull(payment);
         return BeanCopyUtils.copy(payment, PaymentVO.class);
+    }
+
+    @Override
+    public List<PaymentVO> detailByHotelId(String id) {
+        QueryWrapper wrapper = QueryWrapper.create().from(Bookings.class);
+        wrapper.eq(Bookings::getHotelId, id);
+        List<Bookings> bookings = bookingsMapper.selectListByQuery(wrapper);
+        List<Long> bookingIds = bookings.stream().map(Bookings::getBookingId).toList();
+        QueryWrapper wrapper2 = QueryWrapper.create()
+                .in(Payment::getBookingId, bookingIds)
+                .orderBy(Payment::getCreatedAt,false)
+                .eq(Payment::getPaymentStatus, PaymentStatus.FINISHED)
+                .limit(0, 5);
+        return listAs(wrapper2, PaymentVO.class);
     }
 
     private static QueryWrapper buildQueryWrapper(PaymentListDTO dto) {

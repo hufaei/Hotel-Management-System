@@ -1,5 +1,6 @@
 package com.sz.admin.bookings.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.sz.admin.bookings.pojo.dto.BookingsCancelDTO;
 import com.sz.admin.hotelowners.pojo.po.HotelOwners;
@@ -16,11 +17,13 @@ import com.sz.admin.roomtypeinventory.pojo.dto.RoomTypeInventoryCreateDTO;
 import com.sz.admin.roomtypeinventory.service.RoomTypeInventoryService;
 import com.sz.admin.roomtypes.pojo.po.RoomTypes;
 import com.sz.admin.roomtypes.service.RoomTypesService;
+import com.sz.core.common.constant.GlobalConstant;
 import com.sz.core.common.event.EventPublisher;
 import com.sz.platform.enums.BookingStatus;
 import com.sz.platform.enums.PaymentStatus;
 import com.sz.platform.event.PaymentCancelledEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import com.sz.admin.bookings.service.BookingsService;
@@ -61,10 +64,10 @@ public class BookingsServiceImpl extends ServiceImpl<BookingsMapper, Bookings> i
     private final RoomsService roomsService;
     private final RoomTypeInventoryService roomTypeInventoryService;
     private final PaymentService paymentService;
-
+    private final RabbitTemplate rabbitTemplate;
     @Override
     @Transactional
-    public void create(BookingsCreateDTO dto){
+    public Long create(BookingsCreateDTO dto){
         Bookings bookings = BeanCopyUtils.copy(dto, Bookings.class);
         Long bcount = dto.getBookCount();
         // 校验酒店此房型的有效性
@@ -78,8 +81,9 @@ public class BookingsServiceImpl extends ServiceImpl<BookingsMapper, Bookings> i
         CommonResponseEnum.INVALID.message("开始日期不能早于今日").assertTrue(startDate.isBefore(LocalDate.now()));
         CommonResponseEnum.INVALID.message("结束日期不能早于开始日期").assertTrue(!startDate.isBefore(endDate));
 
-        //todo 预订用户id从token中获取
-        bookings.setUserId(1L);
+        CommonResponseEnum.NOLOGIN.message("未登录").assertFalse(StpUtil.isLogin());
+        bookings.setUserId(StpUtil.getLoginIdAsLong());
+//        bookings.setUserId(1L);
         // 1.库存扣减
         List<RoomTypeInventoryBookDTO> dtoList = new ArrayList<>();
         LocalDate currentDate = startDate;
@@ -98,20 +102,31 @@ public class BookingsServiceImpl extends ServiceImpl<BookingsMapper, Bookings> i
 
         // 2.订单创建
         bookings.setStatus(BookingStatus.PENDING_CONFIRMATION);
-        save(bookings);
+        bookings.setIsReview(Boolean.FALSE);
+        save(bookings); // todo 验证id是否填充
         // 3.支付单创建
         Double total = daysBetween*roomTypes.getPrice()*bcount;
         PaymentCreateDTO pdto = new PaymentCreateDTO();
         pdto.setBookingId(bookings.getBookingId());
         pdto.setAmount(total);
         paymentService.create(pdto);
+        // 发送延迟消息，延迟时间为10分钟（600000毫秒）
+        rabbitTemplate.convertAndSend(
+                GlobalConstant.DELAY_EXCHANGE_NAME,
+                GlobalConstant.DELAY_ROUTING_KEY,
+                bookings.getBookingId(),
+                message -> {
+                    message.getMessageProperties().setHeader("x-delay", 600000);
+                    return message;
+                }
+        );
+        return bookings.getBookingId();
     }
 
     @Override
     @Transactional
     public void confirm(BookingsUpdateDTO dto){
-        //酒店管理人员决定房间号
-        Long roomId = dto.getRoomId();
+
 
         QueryWrapper wrapper;
         // 有效性校验——如果是待确认则能确认
@@ -122,13 +137,12 @@ public class BookingsServiceImpl extends ServiceImpl<BookingsMapper, Bookings> i
         CommonResponseEnum.VALID_ERROR.message("非待确认状态不可确认")
                           .assertFalse(BookingStatus.PENDING_CONFIRMATION.equals(bookings.getStatus()));
 
-        //todo 鉴权校验-酒店管理者id从token中获取
-        Long ownerId = 1L;
+        CommonResponseEnum.NOLOGIN.message("未登录").assertFalse(StpUtil.isLogin());
+        String ownerId = StpUtil.getLoginIdAsString();
         HotelOwners hotelOwners = QueryChain.of(HotelOwners.class).eq(HotelOwners::getHotelId, bookings.getHotelId()).one();
         Rooms rooms = QueryChain.of(Rooms.class).eq(Rooms::getHotelId, bookings.getHotelId()).one();
         CommonResponseEnum.INVALID.message("该酒店账号不存在").assertNull(hotelOwners);
         CommonResponseEnum.INVALID.message("该酒店房间不存在").assertNull(rooms);
-        CommonResponseEnum.INVALID_TOKEN.assertFalse(ownerId.equals(hotelOwners.getOwnerId()));
 
         // 支付单必须已经结束
         Payment payment = paymentService.getOne(QueryChain.of(Payment.class).eq(Payment::getBookingId,bookings.getBookingId()));
@@ -136,11 +150,9 @@ public class BookingsServiceImpl extends ServiceImpl<BookingsMapper, Bookings> i
                 .assertFalse(PaymentStatus.FINISHED.equals(payment.getPaymentStatus()));
         // 同时更改房间状态（已入住）
         RoomsUpdateDTO roomsUpdateDTO = new RoomsUpdateDTO();
-        roomsUpdateDTO.setRoomId(roomId);
         roomsService.toCheckIn(roomsUpdateDTO);
 
         bookings.setStatus(BookingStatus.CONFIRMED);
-        bookings.setRoomId(roomId);
         saveOrUpdate(bookings);
     }
 
@@ -156,8 +168,8 @@ public class BookingsServiceImpl extends ServiceImpl<BookingsMapper, Bookings> i
         CommonResponseEnum.VALID_ERROR.message("当前状态不可结束订单")
                           .assertFalse(BookingStatus.CONFIRMED.equals(bookings.getStatus()));
 
-        //todo 鉴权校验-酒店管理者id从token中获取
-        Long ownerId = 1L;
+        CommonResponseEnum.NOLOGIN.message("未登录").assertFalse(StpUtil.isLogin());
+        String ownerId = StpUtil.getLoginIdAsString();
         HotelOwners hotelOwners = QueryChain.of(HotelOwners.class).eq(HotelOwners::getHotelId, bookings.getHotelId()).one();
         CommonResponseEnum.INVALID.message("该酒店账号不存在").assertNull(hotelOwners);
         CommonResponseEnum.INVALID_TOKEN.assertFalse(ownerId.equals(hotelOwners.getOwnerId()));

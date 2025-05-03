@@ -225,7 +225,10 @@ public List<Boolean> batchCancelRoom(List<RoomTypeInventoryBookDTO> dtoList) {
 
     @Override
     public RoomTypeInventoryVO detail(Object id){
-        RoomTypeInventory roomTypeInventory = getById((Serializable) id);
+        QueryWrapper wrapper = QueryWrapper.create().from(RoomTypeInventory.class);
+        wrapper.eq(RoomTypeInventory::getRoomTypeId, id);
+        wrapper.eq(RoomTypeInventory::getDate, LocalDate.now());
+        RoomTypeInventory roomTypeInventory = getOne(wrapper);
         CommonResponseEnum.INVALID_ID.assertNull(roomTypeInventory);
         return BeanCopyUtils.copy(roomTypeInventory, RoomTypeInventoryVO.class);
     }

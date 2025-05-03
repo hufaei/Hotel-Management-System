@@ -6,7 +6,6 @@ import com.sz.admin.hotels.mapper.HotelsMapper;
 import com.sz.admin.hotels.pojo.HotelDocument;
 import com.sz.admin.hotels.pojo.HotelEsSearch;
 import com.sz.admin.hotels.pojo.po.Hotels;
-//import com.sz.admin.hotels.service.HotelIndexService;
 import com.sz.admin.hotels.service.HotelIndexService;
 import com.sz.admin.hotels.service.RecommendService;
 import com.sz.admin.roomtypeinventory.mapper.RoomTypeInventoryMapper;
@@ -58,6 +57,7 @@ import java.util.stream.Collectors;
 public class HotelsController  {
 
     private final HotelsService hotelsService;
+    private final HotelIndexService indexService;
     private final RedisTemplate redisTemplate;
     private final RoomTypeInventoryMapper inventoryMapper;
     private final RoomTypesService roomTypesService;
@@ -175,14 +175,14 @@ public class HotelsController  {
     }
 
 
-//    /**
-//     * 触发数据库数据索引到 Elasticsearch 的接口
-//     */
-//    @PostMapping("/index")
-//    public ApiResult<String> indexHotels() {
-//        hotelIndexService.indexHotels();
-//        return ApiResult.success("酒店数据已成功索引到 Elasticsearch");
-//    }
+    /**
+     * 刷数据专用接口
+     */
+    @PostMapping("/index")
+    public ApiResult<String> indexHotels() {
+        indexService.index();
+        return ApiResult.success("booking数据ok");
+    }
 
     /**
      * 分词查询接口，根据关键字匹配 ES 文档中的 content 字段，

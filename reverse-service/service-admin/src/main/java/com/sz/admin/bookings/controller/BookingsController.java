@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import lombok.RequiredArgsConstructor;
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
 import com.sz.core.common.entity.ApiPageResult;
 import com.sz.core.common.entity.ApiResult;
@@ -40,9 +41,9 @@ public class BookingsController  {
 
     @Operation(summary = "新增")
     @PostMapping
-    public ApiResult create(@RequestBody BookingsCreateDTO dto) {
-        bookingsService.create(dto);
-        return ApiResult.success();
+    public ApiResult<Long> create(@RequestBody BookingsCreateDTO dto) {
+        Long l = bookingsService.create(dto);// 点击预订前端记得二次确认，预订按钮会直接创建订单和预支付单
+        return ApiResult.success(l);
     }
 
     // 酒店

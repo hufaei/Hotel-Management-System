@@ -79,9 +79,9 @@ public class RoomTypeInventoryController  {
     }
 
     @Operation(summary = "详情")
-    @GetMapping("/{id}")
-    public ApiResult<RoomTypeInventoryVO> detail(@PathVariable Object id) {
-        return ApiResult.success(roomTypeInventoryService.detail(id));
+    @GetMapping("/{roomTypeId}")
+    public ApiResult<RoomTypeInventoryVO> detail(@PathVariable Object roomTypeId) {
+        return ApiResult.success(roomTypeInventoryService.detail(roomTypeId));
     }
 
 

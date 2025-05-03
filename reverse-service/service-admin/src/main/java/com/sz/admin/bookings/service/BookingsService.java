@@ -23,7 +23,7 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public interface BookingsService extends IService<Bookings> {
 
-    void create(BookingsCreateDTO dto);
+    Long create(BookingsCreateDTO dto);
 
 
     PageResult<BookingsVO> page(BookingsListDTO dto);

@@ -17,6 +17,8 @@ import com.sz.admin.payment.pojo.dto.PaymentUpdateDTO;
 import com.sz.admin.payment.pojo.dto.PaymentListDTO;
 import com.sz.admin.payment.pojo.vo.PaymentVO;
 
+import java.util.List;
+
 /**
  * <p>
  * 支付单表 Controller
@@ -82,6 +84,12 @@ public class PaymentController  {
     public ApiResult<PaymentVO> detailByBooking(@PathVariable Object id) {
         return ApiResult.success(paymentService.detailByBookingId(id));
     }
+    @Operation(summary = "根据酒店id查询")
+    @GetMapping("/byHotelId/{id}")
+    public ApiResult<List<PaymentVO>> detailByHotelId(@PathVariable String id) {
+        return ApiResult.success(paymentService.detailByHotelId(id));
+    }
+
 
 
 }

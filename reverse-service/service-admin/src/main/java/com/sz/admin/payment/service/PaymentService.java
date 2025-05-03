@@ -39,4 +39,6 @@ public interface PaymentService extends IService<Payment> {
     void paid(PaymentUpdateDTO dto);
 
     PaymentVO detailByBookingId(Object id);
+
+    List<PaymentVO> detailByHotelId(String id);
 }
