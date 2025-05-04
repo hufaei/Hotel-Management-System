@@ -21,6 +21,6 @@ springdoc:
     - group: 'www网站'
       paths-to-match: '/**'
       packages-to-scan: com.sz.www
-    - group: '微信小程序'
-      paths-to-match: '/**'
-      packages-to-scan: com.sz.applet
+#    - group: '微信小程序'
+#      paths-to-match: '/**'
+#      packages-to-scan: com.sz.applet

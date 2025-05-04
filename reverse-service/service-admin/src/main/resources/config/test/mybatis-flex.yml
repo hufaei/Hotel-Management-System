@@ -8,3 +8,4 @@ mybatis-flex:
   global-config:
     deleted-value-of-logic-delete: "T"
     normal-value-of-logic-delete: "F"
+

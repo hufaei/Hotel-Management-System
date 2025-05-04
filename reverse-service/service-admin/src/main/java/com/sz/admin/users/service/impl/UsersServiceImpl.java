@@ -2,6 +2,7 @@ package com.sz.admin.users.service.impl;
 
 import cn.dev33.satoken.secure.BCrypt;
 import cn.dev33.satoken.stp.StpUtil;
+import com.botsuch.rpcstarter.annotation.RpcService;
 import com.mybatisflex.core.query.QueryChain;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.sz.admin.hotelowners.pojo.vo.HotelOwnersVO;
@@ -43,6 +44,7 @@ import com.sz.admin.users.pojo.vo.UsersVO;
  */
 @Service
 @RequiredArgsConstructor
+@RpcService
 public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements UsersService, ResetAuthService {
 
     private final RedisCache redisCache;

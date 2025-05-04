@@ -36,8 +36,6 @@ spring:
     virtual:
       # 启用虚拟线程
       enabled: true
-  profiles:
-    active: local
   config:
     import:
       - classpath:config/${spring.profiles.active}/flyway.yml
@@ -48,6 +46,7 @@ spring:
       - classpath:config/${spring.profiles.active}/page-helper.yml
       - classpath:config/${spring.profiles.active}/redis.yml
       - classpath:config/${spring.profiles.active}/sa-token.yml
+#      - classpath:config/${spring.profiles.active}/botsuch-rpc.yml
   mvc:
     path-match:
       matching-strategy: ant_path_matcher
@@ -99,18 +98,3 @@ hmily:
     confirm-retry-time: 3
     cancel-retry-time: 3
     async: true        # CONFIRM/CANCEL 异步执行
-
-botsuch-rpc:
-  name: BotSuch
-  serverHost: localhost
-  serverPort: 8088
-  mock: false
-  loadBalancer: roundRobin
-  retryStrategy: no
-  serialization: jdk
-  #  serialization: kryo
-  #  serialization: testJdk
-  registryConfig:
-    registry: etcd
-    address: http://127.0.0.1:2380,http://127.0.0.1:2381,http://127.0.0.1:2382
-    timeout: 20000L

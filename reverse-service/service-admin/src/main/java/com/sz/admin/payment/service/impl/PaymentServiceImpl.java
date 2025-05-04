@@ -1,5 +1,6 @@
 package com.sz.admin.payment.service.impl;
 
+import com.botsuch.rpcstarter.annotation.RpcService;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.sz.admin.bookings.mapper.BookingsMapper;
 import com.sz.admin.bookings.pojo.po.Bookings;
@@ -44,6 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@RpcService
 public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, Payment> implements PaymentService {
     private final EventPublisher eventPublisher;
     private final UsersService usersService;

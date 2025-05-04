@@ -38,4 +38,6 @@ public interface AdminsService extends IService<Admins> {
 
     void exportExcel(AdminsListDTO dto, HttpServletResponse response);
 
+    void test();
+
 }

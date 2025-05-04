@@ -1,6 +1,7 @@
 package com.sz.admin.hotelowners.service.impl;
 
 import cn.dev33.satoken.secure.BCrypt;
+import com.botsuch.rpcstarter.annotation.RpcService;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.sz.admin.users.pojo.po.Users;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,7 @@ import com.sz.admin.hotelowners.pojo.vo.HotelOwnersVO;
  */
 @Service
 @RequiredArgsConstructor
+@RpcService
 public class HotelOwnersServiceImpl extends ServiceImpl<HotelOwnersMapper, HotelOwners> implements HotelOwnersService {
 
     private String getEncoderPwd(String pwd) {

@@ -1,5 +1,6 @@
 package com.sz.admin.admins.service.impl;
 
+import com.botsuch.rpcstarter.annotation.RpcService;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,7 @@ import com.sz.admin.admins.pojo.vo.AdminsVO;
  */
 @Service
 @RequiredArgsConstructor
+@RpcService
 public class AdminsServiceImpl extends ServiceImpl<AdminsMapper, Admins> implements AdminsService {
     @Override
     public void create(AdminsCreateDTO dto){
@@ -106,6 +108,11 @@ public class AdminsServiceImpl extends ServiceImpl<AdminsMapper, Admins> impleme
         ExcelUtils.exportExcel(list, "管理员信息表", AdminsVO.class, os);
     }
 
+    @Override
+    public void test() {
+        System.out.println("test");
+    }
+
     private static QueryWrapper buildQueryWrapper(AdminsListDTO dto) {
         QueryWrapper wrapper = QueryWrapper.create().from(Admins.class);
         if (Utils.isNotNull(dto.getAdminId())) {
@@ -125,4 +132,5 @@ public class AdminsServiceImpl extends ServiceImpl<AdminsMapper, Admins> impleme
         }
         return wrapper;
     }
+
 }

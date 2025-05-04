@@ -1,5 +1,5 @@
 minio:
-  endpoint: https://127.0.0.1/
-  access-key: bB5XVpeLKWwzP4DpsWNB
-  secret-key: ls3YhapqxByJ8fE3AkTbjOWgaSw9k2cADeMDkE0c
-  bucket-name: sz-boot-parent-test
+  endpoint: http://192.168.56.101:9001/
+  access-key: NhQlOFYcyXiQm40DpW56
+  secret-key: O1q6YRp79cTeNrtHT8yHXgcFWcOTDJNpKpRsYMzp
+  bucket-name: sz-boot-parent-local

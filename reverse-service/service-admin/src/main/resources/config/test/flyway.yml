@@ -1,6 +1,6 @@
 flyway:
   framework: # 框架迁移脚本管理
-    enabled: true
+    enabled: false
     locations: classpath:/db/framework
     baseline-on-migrate: true
     baseline-version: 1

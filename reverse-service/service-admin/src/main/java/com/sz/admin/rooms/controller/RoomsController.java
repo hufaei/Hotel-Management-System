@@ -1,5 +1,6 @@
 package com.sz.admin.rooms.controller;
 
+import com.botsuch.rpcstarter.annotation.RpcReference;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;

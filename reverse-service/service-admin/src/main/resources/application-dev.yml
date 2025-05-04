@@ -2,3 +2,17 @@ server:
   servlet:
     context-path: /api/admin
   port: 9991
+botsuch-rpc:
+  name: BotSuch
+  serverHost: localhost
+  serverPort: 8001
+  mock: false
+  loadBalancer: roundRobin
+  retryStrategy: no
+  serialization: jdk
+  #  serialization: kryo
+  #  serialization: testJdk
+  registryConfig:
+    registry: etcd
+    address: http://127.0.0.1:2380,http://127.0.0.1:2381,http://127.0.0.1:2382
+    timeout: 20000L

@@ -1,11 +1,7 @@
-server:
-  servlet:
-    context-path: /api/admin
-  port: 9992
 botsuch-rpc:
   name: BotSuch
   serverHost: localhost
-  serverPort: 8003
+  serverPort: 9993
   mock: false
   loadBalancer: roundRobin
   retryStrategy: no

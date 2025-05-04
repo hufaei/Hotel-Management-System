@@ -1,5 +1,6 @@
 package com.sz.admin.roomtypeinventory.service.impl;
 
+import com.botsuch.rpcstarter.annotation.RpcService;
 import com.mybatisflex.core.row.BatchArgsSetter;
 import com.mybatisflex.core.row.Db;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
@@ -42,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @RequiredArgsConstructor
+@RpcService
 public class RoomTypeInventoryServiceImpl extends ServiceImpl<RoomTypeInventoryMapper, RoomTypeInventory> implements RoomTypeInventoryService {
     private final RoomTypesService roomTypesService;
     @Override

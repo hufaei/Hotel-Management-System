@@ -1,5 +1,6 @@
 package com.sz.admin.roomtypes.service.impl;
 
+import com.botsuch.rpcstarter.annotation.RpcService;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.sz.admin.hotels.pojo.po.Hotels;
 import com.sz.admin.hotels.service.HotelsService;
@@ -37,6 +38,7 @@ import com.sz.admin.roomtypes.pojo.vo.RoomTypesVO;
  */
 @Service
 @RequiredArgsConstructor
+@RpcService
 public class RoomTypesServiceImpl extends ServiceImpl<RoomTypesMapper, RoomTypes> implements RoomTypesService {
     private final HotelsService hotelsService;
     @Override

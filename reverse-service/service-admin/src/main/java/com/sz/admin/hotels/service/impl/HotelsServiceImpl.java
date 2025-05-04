@@ -1,9 +1,9 @@
 package com.sz.admin.hotels.service.impl;
 
+import com.botsuch.rpcstarter.annotation.RpcService;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.sz.admin.hotelowners.pojo.po.HotelOwners;
 import com.sz.admin.hotelowners.service.HotelOwnersService;
-import com.sz.admin.reviews.service.ReviewsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.sz.admin.hotels.service.HotelsService;
@@ -11,7 +11,6 @@ import com.sz.admin.hotels.pojo.po.Hotels;
 import com.sz.admin.hotels.mapper.HotelsMapper;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.core.query.QueryChain;
 import com.sz.core.common.enums.CommonResponseEnum;
 import com.sz.core.util.PageUtils;
 import com.sz.core.util.BeanCopyUtils;
@@ -26,7 +25,6 @@ import com.sz.admin.hotels.pojo.dto.HotelsCreateDTO;
 import com.sz.admin.hotels.pojo.dto.HotelsUpdateDTO;
 import com.sz.admin.hotels.pojo.dto.HotelsListDTO;
 import com.sz.core.common.entity.ImportExcelDTO;
-import com.sz.excel.core.ExcelResult;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import com.sz.excel.utils.ExcelUtils;
@@ -44,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @RequiredArgsConstructor
+@RpcService
 public class HotelsServiceImpl extends ServiceImpl<HotelsMapper, Hotels> implements HotelsService {
 
     private final HotelOwnersService hotelOwnersService;

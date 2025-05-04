@@ -1,6 +1,7 @@
 package com.sz.admin.bookings.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
+import com.botsuch.rpcstarter.annotation.RpcService;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.sz.admin.bookings.pojo.dto.BookingsCancelDTO;
 import com.sz.admin.hotelowners.pojo.po.HotelOwners;
@@ -8,17 +9,14 @@ import com.sz.admin.payment.pojo.dto.PaymentCreateDTO;
 import com.sz.admin.payment.pojo.dto.PaymentUpdateDTO;
 import com.sz.admin.payment.pojo.po.Payment;
 import com.sz.admin.payment.service.PaymentService;
-import com.sz.admin.rooms.pojo.dto.RoomsCreateDTO;
 import com.sz.admin.rooms.pojo.dto.RoomsUpdateDTO;
 import com.sz.admin.rooms.pojo.po.Rooms;
 import com.sz.admin.rooms.service.RoomsService;
 import com.sz.admin.roomtypeinventory.pojo.dto.RoomTypeInventoryBookDTO;
-import com.sz.admin.roomtypeinventory.pojo.dto.RoomTypeInventoryCreateDTO;
 import com.sz.admin.roomtypeinventory.service.RoomTypeInventoryService;
 import com.sz.admin.roomtypes.pojo.po.RoomTypes;
 import com.sz.admin.roomtypes.service.RoomTypesService;
 import com.sz.core.common.constant.GlobalConstant;
-import com.sz.core.common.event.EventPublisher;
 import com.sz.platform.enums.BookingStatus;
 import com.sz.platform.enums.PaymentStatus;
 import com.sz.platform.event.PaymentCancelledEvent;
@@ -59,6 +57,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @RequiredArgsConstructor
+@RpcService
 public class BookingsServiceImpl extends ServiceImpl<BookingsMapper, Bookings> implements BookingsService {
     private final RoomTypesService roomTypesService;
     private final RoomsService roomsService;

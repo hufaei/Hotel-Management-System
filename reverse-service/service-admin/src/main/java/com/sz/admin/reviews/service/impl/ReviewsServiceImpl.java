@@ -1,6 +1,7 @@
 package com.sz.admin.reviews.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
+import com.botsuch.rpcstarter.annotation.RpcService;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.sz.admin.bookings.pojo.dto.BookingsListDTO;
 import com.sz.admin.bookings.pojo.po.Bookings;
@@ -54,6 +55,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @RequiredArgsConstructor
+@RpcService
 public class ReviewsServiceImpl extends ServiceImpl<ReviewsMapper, Reviews> implements ReviewsService {
 
     private final UsersService usersService;

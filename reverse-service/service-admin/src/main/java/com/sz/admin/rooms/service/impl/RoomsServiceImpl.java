@@ -1,8 +1,11 @@
 package com.sz.admin.rooms.service.impl;
 
 import cn.dev33.satoken.secure.BCrypt;
+import com.botsuch.rpcstarter.annotation.RpcReference;
+import com.botsuch.rpcstarter.annotation.RpcService;
 import com.mybatisflex.core.query.QueryChain;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+import com.sz.admin.admins.service.AdminsService;
 import com.sz.admin.hotelowners.pojo.po.HotelOwners;
 import com.sz.admin.hotelowners.service.HotelOwnersService;
 import com.sz.admin.hotels.pojo.po.Hotels;
@@ -57,8 +60,12 @@ import com.sz.admin.rooms.pojo.vo.RoomsVO;
  */
 @Service
 @RequiredArgsConstructor
+@RpcService
 public class RoomsServiceImpl extends ServiceImpl<RoomsMapper, Rooms> implements RoomsService {
+    @RpcReference
     private final HotelsService hotelsService;
+    @RpcReference
+    private AdminsService adminsService;
     private final HotelOwnersService ownersService;
     @Override
     public void create(RoomsCreateDTO dto){
@@ -180,33 +187,8 @@ public class RoomsServiceImpl extends ServiceImpl<RoomsMapper, Rooms> implements
         return wrapper;
     }
     @Override
-    public void ontoData(){
-        List<Hotels> hotels = hotelsService.list();
-
-        List<HotelOwners> owners = new ArrayList<>();
-        Random random = new Random();
-        int randomNumber = 100 + random.nextInt(900);
-        for (Hotels hotel : hotels) {
-            String englishName = hotel.getEnglishName();
-            String passwordRaw = (englishName != null && englishName.length() >= 4)
-                    ? englishName.substring(0, 4) + "123"
-                    : "admin123";
-
-            String encodedPwd = BCrypt.hashpw(passwordRaw, BCrypt.gensalt(10));
-
-            HotelOwners owner = new HotelOwners();
-            owner.setOwnerId("BOT"+randomNumber++);
-            owner.setHotelId(hotel.getHotelId());
-            owner.setName((englishName != null ? englishName : "Admin") + "-前台");
-            owner.setEmail(null);  // 邮箱为空
-            owner.setPhone(null);  // 可生成随机手机号或设置为空
-            owner.setPasswordHash(encodedPwd);
-
-            owners.add(owner);
-        }
-
-        ownersService.saveBatch(owners);
-
-        System.out.println("✅ 共插入酒店后台账号数: " + owners.size());}
+    public void ontoData() {
+        adminsService.test();
+    }
 }
 
